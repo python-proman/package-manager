@@ -3,13 +3,17 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Arguments for inspection based CLI parser.'''
 
+from . import configuration
 from . import local
 from . import repository
 from typing import Optional
+import json
 
 
 def info(package: str):
-    repository.get_package_info(package)
+    '''Get package info.'''
+    info = repository.get_package_info(package)
+    print(json.dumps(info, indent=2))
 
 
 def download(package: str, dest: str = '.'):
@@ -24,12 +28,11 @@ def install(package: str):
 
 def uninstall(package: str):
     '''Uninstall packages.'''
-    pass
 
 
-def freeze(package: str):
+def freeze():
     '''Output installed packages in requirements format.'''
-    pass
+    local.freeze()
 
 
 def list():
@@ -51,12 +54,14 @@ def check():
 
 def config():
     '''Manage local and global configuration.'''
-    pass
+    print(configuration.get_site_packages_paths())
 
 
 def search(package: str):
     '''Search PyPI for packages.'''
-    repository.search(package)
+    packages = repository.search(package)
+    for package in packages:
+        print(package)
 
 
 def wheel():
@@ -64,9 +69,9 @@ def wheel():
     pass
 
 
-def hash():
+def hash(package: str, algorithm: str = 'sha256'):
     '''Compute hashes of package archives.'''
-    pass
+    print(repository._lookup_hashes(package))
 
 
 def completion():
