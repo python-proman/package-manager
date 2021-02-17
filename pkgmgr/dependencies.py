@@ -3,6 +3,8 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Provide dependency management.'''
 
+from typing import Dict, List, Optional
+
 from semver import Version
 from semver import VersionRange
 from semver import parse_constraint
@@ -74,7 +76,9 @@ class PackageSource(BasePackageSource):
 
         return sorted(versions, reverse=True)
 
-    def dependencies_for(self, package, version):  # type: (Hashable, Any) -> List[Any]
+    def dependencies_for(
+        self, package, version
+    ):  # type: (Hashable, Any) -> List[Any]
         if package == self.root:
             return self._root_dependencies
 

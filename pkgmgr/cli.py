@@ -3,31 +3,33 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Arguments for inspection based CLI parser.'''
 
+import json
+from typing import Optional
+
 from . import configuration
 from . import local
 from . import repository
-from typing import Optional
-import json
 
 
-def info(package: str):
+def info(name: str):
     '''Get package info.'''
-    info = repository.get_package_info(package)
+    info = repository.get_package_info(name)
     print(json.dumps(info, indent=2))
 
 
-def download(package: str, dest: str = '.'):
+def download(name: str, dest: str = '.'):
     '''Download packages.'''
-    repository.download_package(package, dest)
+    repository.download_package(name, dest)
 
 
-def install(package: str):
+def install(name: str, version: str = None):
     '''Install packages.'''
-    pass
+    repository.install_package(name, version)
 
 
-def uninstall(package: str):
+def uninstall(name: str):
     '''Uninstall packages.'''
+    pass
 
 
 def freeze():
@@ -41,10 +43,10 @@ def list():
         print(p)
 
 
-def show(package: str):
+def show(name: str):
     '''Show information about installed packages.'''
-    for key, val in local.show_package_metadata(package).items():
-         print("{k} {v}".format(k=key, v=val))
+    for key, val in local.show_package_metadata(name).items():
+        print("{k} {v}".format(k=key, v=val))
 
 
 def check():
@@ -57,11 +59,55 @@ def config():
     print(configuration.get_site_packages_paths())
 
 
-def search(package: str):
+def search(
+    name: str,
+    version: Optional[str] = None,
+    stable_version: Optional[str] = None,
+    author: Optional[str] = None,
+    author_email: Optional[str] = None,
+    maintainer: Optional[str] = None,
+    maintainer_email: Optional[str] = None,
+    home_page: Optional[str] = None,
+    license: Optional[str] = None,
+    summary: Optional[str] = None,
+    description: Optional[str] = None,
+    keywords: Optional[str] = None,
+    platform: Optional[str] = None,
+    download_url: Optional[str] = None,
+    classifiers: Optional[str] = None,
+    project_url: Optional[str] = None,
+    docs_url: Optional[str] = None,
+    operation: Optional[str] = None,
+):
     '''Search PyPI for packages.'''
-    packages = repository.search(package)
+    packages = repository.search(
+        query={
+            'name': name,
+            'version': version,
+            'stable_version': stable_version,
+            'author': author,
+            'author_email': author_email,
+            'maintainer': maintainer,
+            'maintainer_email': maintainer_email,
+            'home_page': home_page,
+            'license': license,
+            'summary': summary,
+            'description': description,
+            'keywords': keywords,
+            'platform': platform,
+            'download_url': download_url,
+            'classifiers': classifiers,
+            'project_url': project_url,
+            'docs_url': docs_url,
+        },
+        operation=operation,
+    )
     for package in packages:
-        print(package)
+        print(
+            package['name'].ljust(25),
+            package['version'].ljust(15),
+            package['summary']
+        )
 
 
 def wheel():
@@ -76,9 +122,4 @@ def hash(package: str, algorithm: str = 'sha256'):
 
 def completion():
     '''A helper command used for command completion.'''
-    pass
-
-
-def debug():
-    '''Show information useful for debugging.'''
     pass

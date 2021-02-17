@@ -3,10 +3,22 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Manage local installed packages.'''
 
+import os
+import sys
 from importlib_metadata import metadata
-from typing import Optional
 import hashin
 import pkg_resources
+
+
+def _create_pypackages_path(dir: str = os.getcwd()) -> None:
+    install_dir = os.path.join(
+        dir,
+        '__pypackages__',
+        'lib',
+        f"{sys.version_info.major}.{sys.version_info.minor}",
+    )
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
 
 
 def freeze():
