@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''Provide dependency management.'''
 
-from typing import Dict, List, Optional
+from typing import Any, Dict, Hashable, List, Optional
 
 from semver import Version
 from semver import VersionRange
@@ -28,13 +28,13 @@ class PackageSource(BasePackageSource):
 
     def __init__(self):  # type: () -> None
         self._root_version = Version.parse("0.0.0")
-        self._root_dependencies = []
-        self._packages = {}
+        self._root_dependencies: List[str] = []
+        self._packages: Dict[str, Any] = {}
 
         super(PackageSource, self).__init__()
 
     @property
-    def root_version(self):
+    def root_version(self) -> str:
         return self._root_version
 
     def add(
@@ -57,7 +57,9 @@ class PackageSource(BasePackageSource):
         self._packages[name][version] = dependencies
 
     def root_dep(self, name, constraint):  # type: (str, str) -> None
-        self._root_dependencies.append(Dependency(name, constraint))
+        self._root_dependencies.append(
+            Dependency(name, constraint)  # type: ignore
+        )
 
     def _versions_for(
         self, package, constraint=None
@@ -66,7 +68,7 @@ class PackageSource(BasePackageSource):
             return []
 
         versions = []
-        for version in self._packages[package].keys():
+        for version in self._packages[package].keys():  # type: ignore
             if not constraint or constraint.allows_any(
                 Range(version, version, True, True)
             ):
@@ -80,9 +82,11 @@ class PackageSource(BasePackageSource):
         if package == self.root:
             return self._root_dependencies
 
-        return self._packages[package][version]
+        return self._packages[package][version]  # type: ignore
 
-    def convert_dependency(self, dependency):  # type: (Dependency) -> Constraint
+    def convert_dependency(
+        self, dependency
+    ):  # type: (Dependency) -> Constraint
         if isinstance(dependency.constraint, VersionRange):
             constraint = Range(
                 dependency.constraint.min,

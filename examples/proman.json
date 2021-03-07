@@ -1,0 +1,89 @@
+{
+  "dependencies": [
+    {
+      "hashes": [
+        {
+          "hash": "96f964c3d9da8183f824857ad67c16c00ff3297e7bbca6748f60bd8485ded38c"
+        },
+        {
+          "hash": "9a4faa0e2b9c88a3772f7ce15eb4005bbdd27d1230ab4a0cd3517316175014a6"
+        }
+      ],
+      "package": "fastapi",
+      "version": "0.60.1"
+    },
+    {
+      "hashes": [
+        {
+          "hash": "bd2ffe5e37fb75d014728511f8e68ebf2c80b0fa3d04ca1479f4dc752ae31ac9"
+        },
+        {
+          "hash": "ebe8ee08d9be96a3c9f31b2cb2a24dbdf845247b745664bd8a3f9bd0c977fdbc"
+        }
+      ],
+      "package": "starlette",
+      "version": "0.13.6"
+    },
+    {
+      "hashes": [
+        {
+          "hash": "418b84654b60e44c0cdd5384294b0e4bc1ebf42d6e873819424f3b78b8690614"
+        },
+        {
+          "hash": "4900b8820b687c9a3ed753684337979574df20e6ebe4227381d04b3c3c628f99"
+        },
+        {
+          "hash": "b49c86aecde15cde33835d5d6360e55f5e0067bb7143a8303bf03b872935c75b"
+        },
+        {
+          "hash": "2de562a456c4ecdc80cf1a8c3e70c666625f7d02d89a6174ecf63754c734592e"
+        },
+        {
+          "hash": "f769141ab0abfadf3305d4fcf36660e5cf568a666dd3efab7c3d4782f70946b1"
+        },
+        {
+          "hash": "2dc946b07cf24bee4737ced0ae77e2ea6bc97489ba5a035b603bd1b40ad81f7e"
+        },
+        {
+          "hash": "36dbf6f1be212ab37b5fda07667461a9219c956181aa5570a00edfb0acdfe4a1"
+        },
+        {
+          "hash": "1783c1d927f9e1366e0e0609ae324039b2479a1a282a98ed6a6836c9ed02002c"
+        },
+        {
+          "hash": "cf3933c98cb5e808b62fae509f74f209730b180b1e3c3954ee3f7949e083a7df"
+        },
+        {
+          "hash": "f8af9b840a9074e08c0e6dc93101de84ba95df89b267bf7151d74c553d66833b"
+        },
+        {
+          "hash": "40d765fa2d31d5be8e29c1794657ad46f5ee583a565c83cea56630d3ae5878b9"
+        },
+        {
+          "hash": "3fa799f3cfff3e5f536cbd389368fc96a44bb30308f258c94ee76b73bd60531d"
+        },
+        {
+          "hash": "6c3f162ba175678218629f446a947e3356415b6b09122dcb364e58c442c645a7"
+        },
+        {
+          "hash": "eb75dc1809875d5738df14b6566ccf9fd9c0bcde4f36b72870f318f16b9f5c20"
+        },
+        {
+          "hash": "530d7222a2786a97bc59ee0e0ebbe23728f82974b1f1ad9a11cd966143410633"
+        },
+        {
+          "hash": "b5b3489cb303d0f41ad4a7390cf606a5f2c7a94dcba20c051cd1c653694cb14d"
+        },
+        {
+          "hash": "54122a8ed6b75fe1dd80797f8251ad2063ea348a03b77218d73ea9fe19bd4e73"
+        }
+      ],
+      "package": "pydantic",
+      "version": "1.6.1"
+    }
+  ],
+  "dev-dependencies": [],
+  "name": "",
+  "python_versions": "",
+  "version": "0.0.1"
+}

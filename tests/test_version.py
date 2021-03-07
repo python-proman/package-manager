@@ -1,3 +1,4 @@
+# type: ignore
 from pkgmgr import __version__
 
 

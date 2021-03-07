@@ -1,5 +1,7 @@
+# type: ignore
 '''Test Task-Runner.'''
-from invoke import call, task  # type: ignore
+
+from invoke import call, task
 
 
 from pkgmgr import __version__
@@ -131,6 +133,7 @@ def publish(ctx):
 def clean(ctx):
     '''Clean project dependencies and build.'''
     paths = ['dist', 'logs']
+    paths.append('**/__pypackages__')
     paths.append('**/__pycache__')
     paths.append('**/*.pyc')
     paths.append('pkgmgr.egg-info')
