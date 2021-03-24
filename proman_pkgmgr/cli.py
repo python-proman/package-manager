@@ -11,19 +11,18 @@ from . import distributions
 from . import package_manager
 from .package_manager import PackageManager
 
-
 __package_manager = PackageManager(force=False, update=False, options={})
 
 
 def info(name: str) -> None:
     '''Get package info.'''
-    info = package_manager.get_package_info(name)
+    info = __package_manager.get_package_info(name)
     print(json.dumps(info, indent=2))
 
 
 def download(name: str, dest: str = '.') -> None:
     '''Download packages.'''
-    package_manager.download_package(name, dest)
+    __package_manager.download_package(name, dest)
 
 
 # def install(name: str, version: str = None):
@@ -119,7 +118,7 @@ def search(
     operation: Optional[str] = None,
 ) -> None:
     '''Search PyPI for packages.'''
-    packages = package_manager.search(
+    packages = __package_manager.search(
         query={
             'name': name,
             'version': version,

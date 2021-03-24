@@ -5,7 +5,7 @@
 
 import os
 import sys
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from distlib.database import Distribution, DistributionPath
 # from distlib.index import PackageIndex
@@ -73,26 +73,43 @@ class LocalDistribution(DistributionPath):
         path: List[str] = config.PATHS,
         include_egg: bool = False,
     ) -> None:
+        '''Initialize local distribution.'''
         DistributionPath.__init__(self)
 
     @property
-    def installed_packages(self) -> List[Distribution]:
+    def packages(self) -> List[Distribution]:
         '''List installed packages.'''
         return [x for x in self.get_distributions()]
 
     @property
-    def installed_package_names(self) -> List[str]:
+    def package_names(self) -> List[str]:
+        '''Get packages names.'''
         return [x.key for x in self.get_distributions()]
 
+    @staticmethod
+    def get_package_version(package_name: str) -> Optional[str]:
+        '''Get version of installed package.'''
+        return next(
+            (
+                v
+                for k, v in LocalDistribution.packages  # type: ignore
+                if k == package_name
+            ),
+            None,
+        )
+
     def is_installed(self, name: str) -> bool:
+        '''Check is package is installed.'''
         return False if self.get_distribution(name) is None else True
 
-    def create_pypackages_dir(self, dir: str = os.getcwd()) -> str:
+    def create_pypackages_dir(self, base_dir: Optional[str] = None) -> str:
         '''Create base directory.'''
+        if not base_dir:
+            base_dir = os.getcwd()
         dist_dir = os.path.join(
-            dir,
+            base_dir,
             '__pypackages__',
-            f"{sys.version_info.major}.{sys.version_info.minor}",
+            f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}",
         )
         if not os.path.exists(dist_dir):
             os.makedirs(dist_dir)
@@ -112,4 +129,6 @@ class LocalDistribution(DistributionPath):
         for k, v in paths.items():
             if k != 'prefix':
                 os.makedirs(os.path.join(dist_dir, v), exist_ok=True)
+        sys.path.append(f"{dist_dir}/lib")
+        sys.path.append(f"{dist_dir}/lib64")
         return paths

@@ -11,6 +11,8 @@ from typing import Dict, List, Optional
 
 from compendium.config_manager import ConfigManager
 
+from . import exceptions
+
 path = os.getenv('VIRTUAL_ENV', None)
 PATHS = [path] if path else []
 INDEX_URL = 'https://test.pypi.org/'
@@ -35,7 +37,11 @@ class PyPIConfigManager:
 
 
 class SourceTreeManager(ProjectSettingsMixin):
-    '''Manage source tree configuration file for project.'''
+    '''Manage source tree configuration file for project.
+
+    see PEP-0517
+
+    '''
 
     def __init__(
         self,
@@ -55,9 +61,15 @@ class SourceTreeManager(ProjectSettingsMixin):
             merge_strategy='partition',
             writable=True,
         )
+
         if os.path.exists(config_path):
             config_manager.load(filepath=config_path)
             self.__settings = config_manager.settings
+            print(self.__settings)
+        else:
+            raise exceptions.PackageManagerConfig(
+                'no config found'
+            )
 
         self.python_versions = python_versions
         self.hash_algorithm = hash_algorithm

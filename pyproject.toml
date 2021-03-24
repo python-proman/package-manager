@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pkgmgr"
+name = "proman-pkgmgr"
 version = "0.1.0"
 description = "Simple package manager for Python."
 authors = ["Jesse P. Johnson <jpj6652@gmail.com>"]
@@ -35,16 +35,16 @@ cython = "^0.29.21"
 mypy = "^0.812"
 
 [tool.flit.metadata]
-module = "pkgmgr"
+module = "proman_pkgmgr"
 author = "Jesse P. Johnson"
 author-email = "jpj6652@gmail.com"
-home-page = "https://github.com/kuwv/python-pkgmgr"
+home-page = "https://github.com/python-proman/proman-pkgmgr"
 requires = []
 
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 
 [tool.flit.scripts]
-pkg = "pkgmgr.__main__:main"
+pkg = "proman_pkgmgr.__main__:main"
 
 [tool.black]
 include = '\.pyi?$'

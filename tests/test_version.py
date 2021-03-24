@@ -1,5 +1,5 @@
 # type: ignore
-from pkgmgr import __version__
+from proman_pkgmgr import __version__
 
 
 def test_version():
