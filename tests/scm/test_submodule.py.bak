@@ -1,0 +1,30 @@
+import sys
+from spec import trap
+from invoke import MockContext, Result
+from proman_pkgmgr import submodule
+
+
+@trap
+def test_add(fs):
+    ctx = MockContext(run=Result("Linux\n"))
+    submodule.add(
+        ctx,
+        "python-microservices",
+        url="https://github.com/kuwv/python-microservices.git",
+        path="modules/python-microservices",
+    )
+    print(sys.stdout)
+    # assert "desktop" in sys.stdout.getvalue()
+
+
+@trap
+def test_index(fs):
+    ctx = MockContext(run=Result("Darwin\n"))
+    submodule.index(ctx)
+    # assert "Apple" in sys.stdout.getvalue()
+
+
+@trap
+def test_remove(fs):
+    ctx = MockContext(run=Result("Remove\n"))
+    submodule.remove(ctx, "python-microservices")

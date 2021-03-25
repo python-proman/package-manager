@@ -258,7 +258,7 @@ pyflakes = ">=2.2.0,<2.3.0"
 
 [[package]]
 name = "flit"
-version = "2.3.0"
+version = "3.2.0"
 description = "A simple packaging tool for simple packages."
 category = "dev"
 optional = false
@@ -266,18 +266,17 @@ python-versions = ">=3.5"
 
 [package.dependencies]
 docutils = "*"
-flit_core = ">=2.3.0"
-pytoml = "*"
+flit_core = ">=3.2.0"
 requests = "*"
+toml = "*"
 
 [package.extras]
 doc = ["sphinx", "sphinxcontrib-github-alt", "pygments-github-lexers"]
-installfrom = ["requests-download"]
 test = ["testpath", "responses", "pytest (>=2.7.3)", "pytest-cov"]
 
 [[package]]
 name = "flit-core"
-version = "3.1.0"
+version = "3.2.0"
 description = "Distribution-building parts of Flit. See flit package for more information"
 category = "dev"
 optional = false
@@ -666,6 +665,14 @@ python-versions = ">=3.5"
 snowballstemmer = "*"
 
 [[package]]
+name = "pyfakefs"
+version = "4.4.0"
+description = "pyfakefs implements a fake file system that mocks the Python file system modules."
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "pyflakes"
 version = "2.2.0"
 description = "passive checker of Python programs"
@@ -767,14 +774,6 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests (==2.0.2)", "six", "pytest-xdist", "virtualenv"]
 
 [[package]]
-name = "pytoml"
-version = "0.1.21"
-description = "A parser for TOML-0.4.0"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "pywin32-ctypes"
 version = "0.2.0"
 description = ""
@@ -860,6 +859,14 @@ Click = ">=6.0"
 dparse = ">=0.5.1"
 packaging = "*"
 requests = "*"
+
+[[package]]
+name = "semantic-version"
+version = "2.8.5"
+description = "A library implementing the 'SemVer' scheme."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "six"
@@ -985,7 +992,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "659023f81f3a77f6e410aeb5a062924c5f850473fddeeb1c4ebec84a98faf5d1"
+content-hash = "99454b3582e66fe9736184699feb19a214bbcb602bd21c9a83d3e1c9c19a8073"
 
 [metadata.files]
 altgraph = [
@@ -1159,12 +1166,12 @@ flake8 = [
     {file = "flake8-3.8.4.tar.gz", hash = "sha256:aadae8761ec651813c24be05c6f7b4680857ef6afaae4651a4eccaef97ce6c3b"},
 ]
 flit = [
-    {file = "flit-2.3.0-py3-none-any.whl", hash = "sha256:25d184c59cb6f2a83bc3f3651f01007aed12db379b4dc59a4e5765b7aff4730f"},
-    {file = "flit-2.3.0.tar.gz", hash = "sha256:017012b809ec489918afd68af7a70bd7c8c770c87b60159d875c126866e97a4b"},
+    {file = "flit-3.2.0-py3-none-any.whl", hash = "sha256:721ac36ed1317d22e8b35da80b4fb4a50e09765787ff9649d01a4b05cc9f8a38"},
+    {file = "flit-3.2.0.tar.gz", hash = "sha256:592464c9268bbacec9bc67b5a3ae62e6e090aeec1563e69501df338a1728e551"},
 ]
 flit-core = [
-    {file = "flit_core-3.1.0-py3-none-any.whl", hash = "sha256:1d06e64a6af7e1fd1496563b160df29dd32714e00b473f3b763f6e6810476517"},
-    {file = "flit_core-3.1.0.tar.gz", hash = "sha256:22ff73be39a2b3c9e0692dfbbea3ad4a9d127e5733736a87dbb8ddcbf7309b1e"},
+    {file = "flit_core-3.2.0-py3-none-any.whl", hash = "sha256:6f25843e908dfc3e907b6b9ee71e3d185bcb5aebab8c3431e4e34c261e5ff1b5"},
+    {file = "flit_core-3.2.0.tar.gz", hash = "sha256:ff87f25c5dbc24ef30ea334074e35030e4885e4c5de3bf4e21f15746f6d99431"},
 ]
 future = [
     {file = "future-0.18.2.tar.gz", hash = "sha256:b1bead90b70cf6ec3f0710ae53a525360fa360d306a86583adc6bf83a4db537d"},
@@ -1381,6 +1388,10 @@ pydocstyle = [
     {file = "pydocstyle-5.1.1-py3-none-any.whl", hash = "sha256:aca749e190a01726a4fb472dd4ef23b5c9da7b9205c0a7857c06533de13fd678"},
     {file = "pydocstyle-5.1.1.tar.gz", hash = "sha256:19b86fa8617ed916776a11cd8bc0197e5b9856d5433b777f51a3defe13075325"},
 ]
+pyfakefs = [
+    {file = "pyfakefs-4.4.0-py3-none-any.whl", hash = "sha256:1ac3b2845dabe69af56c20691b9347914581195ccdde352535fb7d4ff0055c19"},
+    {file = "pyfakefs-4.4.0.tar.gz", hash = "sha256:082d863e0e2a74351f697da404e329a91e18e5055942e59d1b836e8459b2c94c"},
+]
 pyflakes = [
     {file = "pyflakes-2.2.0-py2.py3-none-any.whl", hash = "sha256:0d94e0e05a19e57a99444b6ddcf9a6eb2e5c68d3ca1e98e90707af8152c90a92"},
     {file = "pyflakes-2.2.0.tar.gz", hash = "sha256:35b2d75ee967ea93b55750aa9edbbf72813e06a66ba54438df2cfac9e3c27fc8"},
@@ -1411,10 +1422,6 @@ pytest = [
 pytest-cov = [
     {file = "pytest-cov-2.11.1.tar.gz", hash = "sha256:359952d9d39b9f822d9d29324483e7ba04a3a17dd7d05aa6beb7ea01e359e5f7"},
     {file = "pytest_cov-2.11.1-py2.py3-none-any.whl", hash = "sha256:bdb9fdb0b85a7cc825269a4c56b48ccaa5c7e365054b6038772c32ddcdc969da"},
-]
-pytoml = [
-    {file = "pytoml-0.1.21-py2.py3-none-any.whl", hash = "sha256:57a21e6347049f73bfb62011ff34cd72774c031b9828cb628a752225136dfc33"},
-    {file = "pytoml-0.1.21.tar.gz", hash = "sha256:8eecf7c8d0adcff3b375b09fe403407aa9b645c499e5ab8cac670ac4a35f61e7"},
 ]
 pywin32-ctypes = [
     {file = "pywin32-ctypes-0.2.0.tar.gz", hash = "sha256:24ffc3b341d457d48e8922352130cf2644024a4ff09762a2261fd34c36ee5942"},
@@ -1525,6 +1532,10 @@ requirements-parser = [
 safety = [
     {file = "safety-1.10.3-py2.py3-none-any.whl", hash = "sha256:5f802ad5df5614f9622d8d71fedec2757099705c2356f862847c58c6dfe13e84"},
     {file = "safety-1.10.3.tar.gz", hash = "sha256:30e394d02a20ac49b7f65292d19d38fa927a8f9582cdfd3ad1adbbc66c641ad5"},
+]
+semantic-version = [
+    {file = "semantic_version-2.8.5-py2.py3-none-any.whl", hash = "sha256:45e4b32ee9d6d70ba5f440ec8cc5221074c7f4b0e8918bdab748cc37912440a9"},
+    {file = "semantic_version-2.8.5.tar.gz", hash = "sha256:d2cb2de0558762934679b9a104e82eca7af448c9f4974d1f3eeccff651df8a54"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},

@@ -22,7 +22,8 @@ from distlib.wheel import Wheel
 import urllib3
 
 from . import config
-from .dependencies import SourceTreeManager
+from .config import SourceTreeManager
+# from .dependencies import SourceTreeManager
 from .distributions import LocalDistribution
 
 distribution = LocalDistribution()
@@ -43,7 +44,7 @@ class PyPIRepositoryMixin:
             data = json.loads(rsp.data.decode('utf-8'))
             return data
         else:
-            print(f"{package_name} package not found")
+            # print(f"{package_name} package not found")
             return {}
 
     @staticmethod
