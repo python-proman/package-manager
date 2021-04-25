@@ -9,12 +9,12 @@ class PackageManagerException(Exception):
 
 
 class PackageManagerDriver(PackageManagerException):
-    '''Provide exceptions for driver errors.'''
+    '''Provide exception for driver errors.'''
 
 
 class PackageManagerConfig(PackageManagerException):
-    '''Provide exceptions for Config errors.'''
+    '''Provide exception for Config errors.'''
 
 
 class PackageManagerSettings(PackageManagerException):
-    '''Provide exceptions for Settings errors.'''
+    '''Provide exception for Settings errors.'''

@@ -3,31 +3,67 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Arguments for inspection based CLI parser.'''
 
+import atexit
 import json
+import os
 from typing import List, Optional
 
-from . import config as cfg
-from . import distributions
-from . import package_manager
+from . import config as cfg, distributions
+from .config import Config
+from .distributions import LocalDistribution
 from .package_manager import PackageManager
+from .source_tree import LockManager, SourceTreeManager
 
-__package_manager = PackageManager(force=False, update=False, options={})
+source_tree_cfg = Config(filepath=cfg.pyproject_path, writable=True)
+lock_cfg = Config(filepath=cfg.lock_path, writable=True)
+source_tree_mgr = SourceTreeManager(source_tree_cfg)
+lock_mgr = LockManager(lock_cfg)
+
+local_distribution = LocalDistribution()
+local_distribution.load_path()
+atexit.register(local_distribution.remove_path)
+
+pkgmgr = PackageManager(
+    source_tree=source_tree_mgr,
+    lock=lock_mgr,
+    distribution=local_distribution,
+    force=False,
+    update=False,
+    options={}
+)
+
+
+def init(name: str) -> None:
+    '''Initialize a new project.'''
+    if not os.path.isfile(source_tree_cfg.filepath):
+        source_tree_cfg['tool'] = {
+            'proman': {
+                'authors': ['Jesse P. Johnson'],
+                'name': name,
+                'description': 'Description for the project',
+                'version': '0.1.0',
+                'dependencies': {},
+                'dev-dependencies': {}
+            }
+            # 'build-system': {
+            #     'requires': ["build"],
+            #     'build-backend': 'build.api:main'
+            # }
+        }
+        source_tree_cfg.dump(writable=True)
+    else:
+        print('project is already initialized')
 
 
 def info(name: str) -> None:
     '''Get package info.'''
-    info = __package_manager.get_package_info(name)
+    info = pkgmgr.get_package_info(name)
     print(json.dumps(info, indent=2))
 
 
 def download(name: str, dest: str = '.') -> None:
     '''Download packages.'''
-    __package_manager.download_package(name, dest)
-
-
-# def install(name: str, version: str = None):
-#     '''Install packages.'''
-#     # package_manager.install_package(name, version)
+    pkgmgr.download_package(name, dest)
 
 
 def install(
@@ -57,26 +93,27 @@ def install(
 
     '''
     if not name.startswith('-'):
-        __package_manager.install(
-            name, dev, python, platform, optional,  prerelease
-        )
+        pkgmgr.install(name, dev, python, platform, optional, prerelease)
     else:
         print('error: not a valid install argument')
 
 
 def uninstall(name: str) -> None:
     '''Uninstall packages.'''
-    pass
+    if not name.startswith('-'):
+        pkgmgr.uninstall(name)
+    else:
+        print('error: not a valid install argument')
 
 
-def freeze() -> None:
-    '''Output installed packages in requirements format.'''
-    distributions.freeze()
+# def freeze() -> None:
+#     '''Output installed packages in requirements format.'''
+#     distributions.freeze()
 
 
 def list(path: List[str] = []) -> None:
     '''List installed packages.'''
-    for p in distributions.get_installed_packages(path):
+    for p in local_distribution.packages:
         # print(p.__dict__)
         print(f"{p.key}=={p.version}")
 
@@ -87,14 +124,14 @@ def list(path: List[str] = []) -> None:
 #         print("{k} {v}".format(k=key, v=val))
 
 
-def check() -> None:
-    '''Verify installed packages have compatible dependencies.'''
-    pass
+# def check() -> None:
+#     '''Verify installed packages have compatible dependencies.'''
+#     pass
 
 
 def config() -> None:
     '''Manage distributions and global configuration.'''
-    print(cfg.get_site_packages_paths())
+    print(distributions.get_site_packages_paths())
 
 
 def search(
@@ -118,7 +155,7 @@ def search(
     operation: Optional[str] = None,
 ) -> None:
     '''Search PyPI for packages.'''
-    packages = __package_manager.search(
+    packages = pkgmgr.search(
         query={
             'name': name,
             'version': version,
@@ -148,16 +185,16 @@ def search(
         )
 
 
-def wheel() -> None:
-    '''Build wheels from your requirements.'''
-    pass
+# def wheel() -> None:
+#     '''Build wheels from your requirements.'''
+#     pass
 
 
-def hash(package: str, algorithm: str = 'sha256') -> None:
-    '''Compute hashes of package archives.'''
-    print(package_manager._lookup_hashes(package))
+# def hash(package: str, algorithm: str = 'sha256') -> None:
+#     '''Compute hashes of package archives.'''
+#     print(pkgmgr.lookup_hashes(package))
 
 
-def completion() -> None:
-    '''A helper command used for command completion.'''
-    pass
+# def completion() -> None:
+#     '''A helper command used for command completion.'''
+#     pass

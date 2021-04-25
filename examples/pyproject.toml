@@ -1,26 +1,11 @@
 [tool]
 [tool.proman]
 authors = ["Jesse P. Johnson"]
-description = ""
-name = "test"
-version = "0.0.1"
+name = "check"
+description = "Description for the project"
+version = "0.1.0"
 
 [tool.proman.dependencies]
-fastapi = "*"
-python = "^3.6"
+flask = "*"
 
 [tool.proman.dev-dependencies]
-black = "^19.10b0"
-bump2version = "^1.0.0"
-flake8 = "^3.7.9"
-flit = "^2.3.0"
-invoke = "^1.4.1"
-isort = "^4.3.21"
-mkdocs = "^1.1.2"
-mypy = "^0.782"
-pyfakefs = "^4.0.2"
-pymdown-extensions = "^7.1"
-pytest = "^5.4.2"
-pytest-cov = "^2.10.0"
-safety = "^1.9.0"
-spec = "^1.4.1"

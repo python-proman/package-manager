@@ -1,22 +1,23 @@
 # type: ignore
 import os
 
-from proman_pkgmgr.config import SourceTreeManager
+from proman_pkgmgr.config import Config
+from proman_pkgmgr.source_tree import SourceTreeManager
 
-settings_path = os.path.dirname(__file__)
-package_file = f"{settings_path}/pyproject.toml"
+pyproject_file = os.path.join(os.path.dirname(__file__), 'pyproject.toml')
+pyproject_config = Config(filepath=pyproject_file, writable=True)
 package = 'urllib3'
 
 
 def test_add_dependency():
-    src = SourceTreeManager(config_path=package_file)
+    src = SourceTreeManager(pyproject_config)
     src.add_dependency(package, version='1.20.0', dev=False)
     dep = src.retrieve_dependency(package, dev=False)
     assert package == list(dep.keys())[0]
 
 
 def test_remove_dependency():
-    src = SourceTreeManager(config_path=package_file)
+    src = SourceTreeManager(pyproject_config)
     src.add_dependency(package, version=None, dev=False)
     src.remove_dependency(package)
     dep = src.retrieve_dependency(package, dev=False)
@@ -24,7 +25,7 @@ def test_remove_dependency():
 
 
 def test_update_dependency():
-    src = SourceTreeManager(config_path=package_file)
+    src = SourceTreeManager(pyproject_config)
     src.add_dependency(package, version='1.20.0', dev=False)
     dep = src.retrieve_dependency(package, dev=False)
     for pkg, ver in dep.items():
