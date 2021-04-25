@@ -12,9 +12,10 @@ from compendium.config_manager import ConfigFile
 # from . import exception
 
 INDEX_URL = 'https://test.pypi.org/'
-path = os.getenv('VIRTUAL_ENV', None)
-PATHS = [path] if path else []
+VENV_PATH = os.getenv('VIRTUAL_ENV', None)
+PATHS = [VENV_PATH] if VENV_PATH else []
 
+# TODO check VCS for paths
 base_dir = os.getcwd()
 pyproject_path = os.path.join(base_dir, 'pyproject.toml')
 lock_path = os.path.join(base_dir, 'proman.json')
@@ -31,7 +32,7 @@ class Config(ConfigFile):
     '''Manage settings from configuration file.'''
 
     filepath: str
-    index_url: str = 'https://pypi.org/simple'
+    index_url: str = f"{INDEX_URL}simple"
     python_versions: tuple = ()
     hash_algorithm: str = 'sha256'
     include_prereleases: bool = False

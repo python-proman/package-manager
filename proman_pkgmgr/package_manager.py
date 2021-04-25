@@ -45,7 +45,7 @@ class PyPIRepositoryMixin:
             return {}
 
     @staticmethod
-    def get_package_info(
+    def get_info(
         name: str,
         section: Optional[str] = None,
     ) -> Dict[str, Any]:
@@ -61,20 +61,30 @@ class PyPIRepositoryMixin:
         name: str,
         dest: str = '.',
         digests: List[str] = [],
-    ) -> str:
+    ) -> Optional[str]:
         '''Execute package download.'''
         pkg_data = PyPIRepositoryMixin._lookup_package(name)
         # TODO create locator
-        pkg = next(
-            (p for p in pkg_data['urls'] if p['packagetype'] == 'bdist_wheel'),
-            (p for p in pkg_data['urls'] if p['packagetype'] == 'sdist'),
-        )
-        index = PackageIndex(url=urljoin(config.INDEX_URL, 'pypi'))
-        filepath = os.path.join(dest, pkg['filename'])  # type: ignore
-        index.download_file(
-            pkg['url'], filepath, digest=None, reporthook=None  # type: ignore
-        )
-        return filepath
+        if pkg_data != {}:
+            pkg = next(
+                (
+                    p
+                    for p in pkg_data['urls']
+                    if p['packagetype'] == 'bdist_wheel'
+                ),
+                (p for p in pkg_data['urls'] if p['packagetype'] == 'sdist'),
+            )
+            index = PackageIndex(url=urljoin(config.INDEX_URL, 'pypi'))
+            filepath = os.path.join(dest, pkg['filename'])  # type: ignore
+            index.download_file(
+                pkg['url'],  # type: ignore
+                filepath,
+                digest=None,
+                reporthook=None
+            )
+            return filepath
+        else:
+            return None
 
     @staticmethod
     def search(
@@ -132,7 +142,7 @@ class PackageManager(PyPIRepositoryMixin):
         importlib.reload(pkg_resources)
 
     @staticmethod
-    def get_package_dependencies(name: str) -> List[str]:
+    def get_dependencies(name: str) -> List[str]:
         '''Retrieve dependencies of a package.'''
         # TODO: try catch if package is not found
         pkg = pkg_resources\
@@ -147,10 +157,10 @@ class PackageManager(PyPIRepositoryMixin):
         package_info = [x for x in re.split(regex, package) if x != '']
         name = package_info[0]
         if len(package_info) == 2:
-            package_version = package_info[1]
+            version = package_info[1]
         else:
-            package_version = '*'
-        return name, package_version
+            version = '*'
+        return name, version
 
     def save(self) -> None:
         '''Save each configuration.'''
@@ -188,23 +198,33 @@ class PackageManager(PyPIRepositoryMixin):
 
     # Install package
     def __install_wheel(
-        self, package: str, force: bool, upgrade: bool, options: dict
+        self,
+        package: str,
+        filepath: str,
+        force: bool,
+        upgrade: bool,
+        options: dict
     ) -> None:
         '''Add package to distribution.'''
         # create tempdir yield
-        paths = self.distribution.create_distribution_dir()
-        with TemporaryDirectory() as temp_dir:
-            filepath = self.download_package(package, temp_dir, digests=[])
-            wheel = Wheel(filepath)
-            wheel.install(paths=paths, maker=ScriptMaker(None, None))
+        paths = self.distribution.create_pypackages()
+        wheel = Wheel(filepath)
+        wheel.install(paths=paths, maker=ScriptMaker(None, None))
 
     def _install_package(self, package: str, dev: bool = False) -> None:
         '''Perform package installation.'''
         # FIXME: duplication with install()
-        name, package_version = PackageManager.get_name(package)
+        name, version = PackageManager.get_name(package)
         options = self.__get_options()
         # TODO: Should dependencies be nested...
-        self.__install_wheel(name, self.force, self.update, options)
+        with TemporaryDirectory() as temp_dir:
+            filepath = self.download_package(package, temp_dir, digests=[])
+            if filepath:
+                self.__install_wheel(
+                    name, filepath, self.force, self.update, options
+                )
+            else:
+                print('package not found')
 
         # if self.__lockfile.is_locked(name, dev):
         #     # TODO: hashes were not working
@@ -219,11 +239,11 @@ class PackageManager(PyPIRepositoryMixin):
         #     # TODO: Should dependencies be nested...
         #     pkgmgr.install(package, self.force, self.update, options)
         #     print(pkgmgr.installed_packages)
-        #     package_version = self.get_package_version(name)
-        #     self.__lockfile.add_lock(name, package_version, dev)
+        #     version = self.get_version(name)
+        #     self.__lockfile.add_lock(name, version, dev)
 
         PackageManager._refresh_packages()
-        for dependency in PackageManager.get_package_dependencies(name):
+        for dependency in PackageManager.get_dependencies(name):
             self._install_package(dependency, dev)
 
     # TODO: Split dependency lookup and install
@@ -237,9 +257,9 @@ class PackageManager(PyPIRepositoryMixin):
         prerelease: bool = False,
     ) -> None:
         '''Install package and dependencies.'''
-        # self.distribution.create_distribution_dir()
-        name, package_version = PackageManager.get_name(package)
-        self.__source_tree.add_dependency(name, package_version, dev)
+        # self.distribution.create_pypackages()
+        name, version = PackageManager.get_name(package)
+        self.__source_tree.add_dependency(name, version, dev)
         self._install_package(package, dev)
         self.save()
 
@@ -250,14 +270,14 @@ class PackageManager(PyPIRepositoryMixin):
 
     def _uninstall_package(self, package: str) -> None:
         '''Perform package uninstall tasks.'''
-        name, package_version = PackageManager.get_name(package)
-        print(name, package_version)
+        name, version = PackageManager.get_name(package)
+        print(name, version)
         # options = self.__get_options()
 
         print(self.distribution)
         if self.distribution.is_installed(name):
             print('installed')
-            for dependency in PackageManager.get_package_dependencies(
+            for dependency in PackageManager.get_dependencies(
                 name
             ):
                 self.uninstall(dependency)
@@ -275,17 +295,17 @@ class PackageManager(PyPIRepositoryMixin):
     # Upgrade package
     def upgrade(self, package: str = 'all', force: bool = False) -> None:
         '''Upgrade/downgrade package and dependencies.'''
-        name, package_version = PackageManager.get_name(package)
+        name, version = PackageManager.get_name(package)
 
         if package != 'all' and self.distribution.is_installed(name):
             self.distribution.upgrade(package, force)
-            # package_version = (
-            #     self.distribution.get_package_version(name)
+            # version = (
+            #     self.distribution.get_version(name)
             # )
             # if self.__lockfile.is_locked(name):
-            #     self.__lockfile.update_lock(name, package_version)
+            #     self.__lockfile.update_lock(name, version)
             # else:
-            #     self.__lockfile.add_lock(name, package_version)
+            #     self.__lockfile.add_lock(name, version)
         else:
             # TODO: iterate and update all locks
             self.distribution.upgrade_all()

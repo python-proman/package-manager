@@ -1,0 +1,24 @@
+[tool.proman]
+name = "test"
+version = "0.0.1"
+description = ""
+authors = ["Jesse P. Johnson"]
+
+[tool.proman.dev-dependencies]
+flake8 = "^3.7.9"
+spec = "^1.4.1"
+flit = "^2.3.0"
+pytest = "^5.4.2"
+black = "^19.10b0"
+isort = "^4.3.21"
+mkdocs = "^1.1.2"
+pymdown-extensions = "^7.1"
+mypy = "^0.782"
+pyfakefs = "^4.0.2"
+pytest-cov = "^2.10.0"
+safety = "^1.9.0"
+bump2version = "^1.0.0"
+invoke = "^1.4.1"
+
+[tool.proman.dependencies]
+python = "^3.6"

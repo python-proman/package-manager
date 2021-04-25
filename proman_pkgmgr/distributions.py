@@ -28,16 +28,12 @@ class DistributionMixin(DistributionPath):
     @property
     def package_names(self) -> List[str]:
         '''Get packages names.'''
-        return [x.key for x in self.get_distributions()]
+        return [x.name for x in self.get_distributions()]
 
-    def get_package_version(self, package_name: str) -> Optional[str]:
+    def get_version(self, name: str) -> Optional[str]:
         '''Get version of installed package.'''
         return next(
-            (
-                v
-                for k, v in self.packages
-                if k == package_name
-            ),
+            (v for k, v in self.packages if k == name),
             None,
         )
 
@@ -57,68 +53,59 @@ class LocalDistribution(DistributionMixin):
 
     def __init__(
         self,
-        paths: Optional[List[str]] = None,
+        paths: List[str] = [],
         include_egg: bool = False,
     ) -> None:
         '''Initialize local distribution.'''
+        self.dist_dir = os.path.join(
+            config.pypackages_dir,
+            f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}",
+        )
+        # TODO: use pth
+        paths.append(os.path.join(self.dist_dir, 'lib'))
+        paths.append(os.path.join(self.dist_dir, 'lib64'))
         DistributionPath.__init__(self, paths, include_egg)
+        print(self.__dict__)
 
-    @staticmethod
-    def load_path(path: Optional[str] = None) -> None:
+    def load_path(self) -> None:
         '''Add path to sys.path.'''
-        path = path or config.pypackages_dir
-        if os.path.isdir(path):
-            if path not in sys.path:
-                sys.path.insert(-1, path)
+        for path in self.path:
+            if os.path.isdir(path):
+                if path not in sys.path:
+                    sys.path.insert(-1, path)
+            #     else:
+            #         print('path already loaded')
             # else:
-            #     print('path already loaded')
-        # else:
-        #     print('path does not exist')
+            #     print('path does not exist')
 
-    @staticmethod
-    def remove_path(path: Optional[str] = None) -> None:
+    def remove_path(self) -> None:
         '''Remove path from sys.path.'''
-        path = path or config.pypackages_dir
-        if path in sys.path:
-            sys.path.remove(path)
+        for path in self.path:
+            if path in sys.path:
+                sys.path.remove(path)
 
     def is_installed(self, name: str) -> bool:
         '''Check is package is installed.'''
         return False if self.get_distribution(name) is None else True
 
-    @staticmethod
-    def create_pypackages_dir(base_dir: Optional[str] = None) -> str:
-        '''Create base directory.'''
-        if not base_dir:
-            pypackages_dir = config.pypackages_dir
-        else:
-            pypackages_dir = os.path.join(base_dir, '__pypackages__')
-        dist_dir = os.path.join(
-            pypackages_dir,
-            f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}",
-        )
-        if not os.path.exists(dist_dir):
-            os.makedirs(dist_dir)
-        return dist_dir
-
-    def create_distribution_dir(
+    def create_pypackages(
         self, base_dir: Optional[str] = None
     ) -> Dict[str, str]:
         '''Create pypackages directory.'''
-        dist_dir = self.create_pypackages_dir(base_dir)
+        if not os.path.exists(self.dist_dir):
+            os.makedirs(self.dist_dir)
         paths = {
-            'prefix': dist_dir,
-            'purelib': f"{dist_dir}/lib",
-            'platlib': f"{dist_dir}/lib64",
-            'scripts': f"{dist_dir}/bin",
-            'headers': f"{dist_dir}/src",
-            'data': f"{dist_dir}/share",
+            'prefix': self.dist_dir,
+            'purelib': f"{self.dist_dir}/lib",
+            'platlib': f"{self.dist_dir}/lib64",
+            'scripts': f"{self.dist_dir}/bin",
+            'headers': f"{self.dist_dir}/src",
+            'data': f"{self.dist_dir}/share",
         }
         for k, v in paths.items():
             if k != 'prefix':
-                os.makedirs(os.path.join(dist_dir, v), exist_ok=True)
-        self.load_path(f"{dist_dir}/lib")
-        self.load_path(f"{dist_dir}/lib64")
+                os.makedirs(os.path.join(self.dist_dir, v), exist_ok=True)
+        # self.load_path()
         return paths
 
 

@@ -29,11 +29,11 @@ def test_update_dependency():
     src.add_dependency(package, version='1.20.0', dev=False)
     dep = src.retrieve_dependency(package, dev=False)
     for pkg, ver in dep.items():
-        assert pkg == 'urllib3'
+        assert pkg == package
         assert ver == '1.20.0'
 
     src.update_dependency(package, version='1.25.0')
     dep = src.retrieve_dependency(package, dev=False)
     for pkg, ver in dep.items():
-        assert pkg == 'urllib3'
+        assert pkg == package
         assert ver == '1.25.0'
