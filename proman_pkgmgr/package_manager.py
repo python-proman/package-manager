@@ -21,7 +21,7 @@ from distlib.wheel import Wheel
 import urllib3
 
 from . import config
-from .config import Config
+# from .config import Config
 from .distributions import LocalDistribution
 from .source_tree import LockManager, SourceTreeManager
 
@@ -69,7 +69,6 @@ class PyPIRepositoryMixin:
             (p for p in pkg_data['urls'] if p['packagetype'] == 'bdist_wheel'),
             (p for p in pkg_data['urls'] if p['packagetype'] == 'sdist'),
         )
-        print(next(pkg))
         index = PackageIndex(url=urljoin(config.INDEX_URL, 'pypi'))
         filepath = os.path.join(dest, pkg['filename'])  # type: ignore
         index.download_file(
@@ -124,7 +123,7 @@ class PackageManager(PyPIRepositoryMixin):
         self.options['no-deps'] = True
         self.pypackages_enabled = pypackages_enabled
         if self.pypackages_enabled:
-            self.pypackages_dir = os.path.join(os.getcwd(), '__pypackages__')
+            self.pypackages_dir = config.pypackages_dir
 
     @staticmethod
     def _refresh_packages() -> None:
@@ -242,7 +241,7 @@ class PackageManager(PyPIRepositoryMixin):
         name, package_version = PackageManager.get_name(package)
         self.__source_tree.add_dependency(name, package_version, dev)
         self._install_package(package, dev)
-        self.__source_tree.save()
+        self.save()
 
     # Uninstall package
     def __remove_package(self, name: str) -> None:
@@ -251,10 +250,13 @@ class PackageManager(PyPIRepositoryMixin):
 
     def _uninstall_package(self, package: str) -> None:
         '''Perform package uninstall tasks.'''
-        name, packag_version = PackageManager.get_name(package)
+        name, package_version = PackageManager.get_name(package)
+        print(name, package_version)
         # options = self.__get_options()
 
+        print(self.distribution)
         if self.distribution.is_installed(name):
+            print('installed')
             for dependency in PackageManager.get_package_dependencies(
                 name
             ):
@@ -262,6 +264,7 @@ class PackageManager(PyPIRepositoryMixin):
             self.__remove_package(name)
             # self.__lockfile.remove_lock(name)
         else:
+            print('not installed')
             print("{p} is not installed".format(p=name))
 
     def uninstall(self, package: str) -> None:

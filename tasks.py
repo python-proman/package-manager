@@ -3,7 +3,6 @@
 
 from invoke import call, task
 
-
 from proman_pkgmgr import __version__
 
 
