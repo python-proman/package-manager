@@ -5,7 +5,7 @@ from proman_pkgmgr.config import Config
 from proman_pkgmgr.source_tree import LockManager
 
 lock_file = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), 'proman.json'
+    os.path.dirname(os.path.realpath(__file__)), 'proman-lock.json'
 )
 lock_config = Config(filepath=lock_file, writable=True)
 package = 'urllib3'

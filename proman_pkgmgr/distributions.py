@@ -65,7 +65,6 @@ class LocalDistribution(DistributionMixin):
         paths.append(os.path.join(self.dist_dir, 'lib'))
         paths.append(os.path.join(self.dist_dir, 'lib64'))
         DistributionPath.__init__(self, paths, include_egg)
-        print(self.__dict__)
 
     def load_path(self) -> None:
         '''Add path to sys.path.'''

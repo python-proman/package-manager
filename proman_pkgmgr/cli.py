@@ -111,11 +111,13 @@ def uninstall(name: str) -> None:
 #     distributions.freeze()
 
 
-def list(path: List[str] = []) -> None:
+def list(versions: bool = False) -> None:
     '''List installed packages.'''
-    for p in local_distribution.packages:
-        # print(p.__dict__)
-        print(f"{p.key}=={p.version}")
+    if versions:
+        for k, v in local_distribution.packages:
+            print("{k} {v}".format(k=k, v=v))
+    else:
+        print('\n'.join(local_distribution.package_names))
 
 
 # def show(name: str) -> None:

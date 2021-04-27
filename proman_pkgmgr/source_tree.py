@@ -5,10 +5,7 @@
 
 from typing import Any, Dict, Optional
 
-# from distlib.index import PackageIndex
-# from distlib.locators import locate
-# from distlib.scripts import ScriptMaker
-# from distlib.wheel import Wheel
+from distlib.database import Distribution
 # from semantic_version import Version
 import hashin
 
@@ -43,9 +40,7 @@ class SourceTreeManager(ProjectSettingsMixin):
         )
 
     def retrieve_dependency(
-        self,
-        package: str,
-        dev: bool = False,
+        self, name: str, dev: bool = False,
     ) -> Dict[str, str]:
         '''Retrieve depencency configuration.'''
         return {
@@ -53,41 +48,38 @@ class SourceTreeManager(ProjectSettingsMixin):
             for x, v in self.__settings.retrieve(
                 f"/tool/proman/{self.dependency_type(dev)}"
             ).items()
-            if (x == package)
+            if (x == name)
         }
 
     def add_dependency(
-        self,
-        package: str,
-        version: Optional[str] = None,
-        dev: bool = False,
+        self, package: Distribution, dev: bool = False,
     ) -> None:
         '''Add dependency to configuration.'''
-        if not self.is_dependency(package, dev):
-            if version is None:
+        if not self.is_dependency(package.name, dev):
+            if package.version is None:
                 version = '*'
+            else:
+                version = package.version
             self.__settings.create(
-                f"/tool/proman/{self.dependency_type(dev)}/{package}",
+                f"/tool/proman/{self.dependency_type(dev)}/{package.name}",
                 version,
             )
 
-    def remove_dependency(self, package: str) -> None:
+    def remove_dependency(self, name: str) -> None:
         '''Remove dependency from configuration.'''
         for dev in [True, False]:
-            if self.is_dependency(package, dev):
+            if self.is_dependency(name, dev):
                 self.__settings.delete(
-                    f"/tool/proman/{self.dependency_type(dev)}/{package}"
+                    f"/tool/proman/{self.dependency_type(dev)}/{name}"
                 )
 
     def update_dependency(
-        self,
-        package: str,
-        version: Optional[str] = None,
+        self, package: Distribution,
     ) -> None:
         '''Update existing dependency.'''
-        self.remove_dependency(package)
+        self.remove_dependency(package.name)
         for dev in [True, False]:
-            self.add_dependency(package, version, dev)
+            self.add_dependency(package, dev)
 
     def save(self) -> None:
         '''Update the source tree config.'''
@@ -107,6 +99,7 @@ class LockManager(ProjectSettingsMixin):
         version: Optional[str] = None,
     ) -> Dict[str, Any]:
         '''Lookup package hash from configuration.'''
+        # TODO: replace with distlib hashes
         package_hashes = hashin.get_package_hashes(
             package=package,
             version=version,
@@ -119,32 +112,31 @@ class LockManager(ProjectSettingsMixin):
         )
         return package_hashes
 
-    def is_locked(self, package: str, dev: bool = False) -> bool:
+    def is_locked(self, name: str, dev: bool = False) -> bool:
         '''Check if package lock is in configuration.'''
         result = any(
-            package in p['package']
+            name in p['package']
             for p in self.__settings.retrieve(f"/{self.dependency_type(dev)}")
         )
         return result
 
-    def retrieve_lock(self, package: str, dev: bool = False) -> Dict[str, Any]:
+    def retrieve_lock(self, name: str, dev: bool = False) -> Dict[str, Any]:
         '''Retrieve package lock from configuration.'''
         result = [
             x
             for x in self.__settings.retrieve(f"/{self.dependency_type(dev)}")
-            if x['package'] == package
+            if x['package'] == name
         ]
         return result[0] if result else {}
 
     def update_lock(
         self,
-        package: str,
-        version: str,
+        package: Distribution,
         dev: bool = False
     ) -> None:
         '''Update existing package lock in configuration.'''
-        update_lock = self.lookup_hashes(package, version)
-        package_lock = self.retrieve_lock(package, dev)
+        update_lock = self.lookup_hashes(package.name, package.version)
+        package_lock = self.retrieve_lock(package.name, dev)
 
         # TODO: handle version empty strings
         # if Version(update_lock['version']) > Version(package_lock['version']):
@@ -163,20 +155,19 @@ class LockManager(ProjectSettingsMixin):
 
     def add_lock(
         self,
-        package: str,
-        version: Optional[str] = None,
+        package: Distribution,
         dev: bool = False,
     ) -> None:
         '''Add package lock to configuration.'''
         if not self.is_locked(package, dev):
-            package_hashes = self.lookup_hashes(package, version)
+            package_hashes = self.lookup_hashes(package.name, package.version)
             self.__settings.append(
                 f"/{self.dependency_type(dev)}", package_hashes
             )
         else:
             print('package lock already exists')
 
-    def remove_lock(self, package: str) -> None:
+    def remove_lock(self, name: str) -> None:
         '''Remove package lock from configuration.'''
         for type in ['dev-dependencies', 'dependencies']:
             self.__settings.set(
@@ -184,7 +175,7 @@ class LockManager(ProjectSettingsMixin):
                 [
                     x
                     for x in self.__settings.retrieve(type)
-                    if not (x['package'] == package)
+                    if not (x['package'] == name)
                 ],
             )
 

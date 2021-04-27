@@ -18,7 +18,12 @@ def test_packages():
     local_dist = LocalDistribution([path])
     assert local_dist.packages[0].name == package
     assert local_dist.is_installed(package) is True
+
     dist = local_dist.get_distribution(package)
+
+    from distlib.locators import DistPathLocator
+    dist_path = DistPathLocator(local_dist)
+    print(dist_path._get_project(package))
     for x in dist.list_installed_files():
         print(x)
 

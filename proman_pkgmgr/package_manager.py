@@ -9,13 +9,14 @@ import json
 import os
 import re
 import pkg_resources
-# import shutil
+import shutil
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
 
+from distlib.database import Distribution
 from distlib.index import PackageIndex
-# from distlib.locators import locate
+from distlib.locators import locate
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 import urllib3
@@ -58,12 +59,15 @@ class PyPIRepositoryMixin:
 
     @staticmethod
     def download_package(
-        name: str,
+        package: Distribution,
         dest: str = '.',
         digests: List[str] = [],
     ) -> Optional[str]:
         '''Execute package download.'''
-        pkg_data = PyPIRepositoryMixin._lookup_package(name)
+        pkg_data = PyPIRepositoryMixin._lookup_package(package.name)
+        # for k, v in pkg_data['releases'].items():
+        #     print(k, v)
+
         # TODO create locator
         if pkg_data != {}:
             pkg = next(
@@ -128,9 +132,6 @@ class PackageManager(PyPIRepositoryMixin):
         self.force = force
         self.update = update
         self.options = options
-        # TODO: should go with requirements
-        # options('require-hashes')
-        self.options['no-deps'] = True
         self.pypackages_enabled = pypackages_enabled
         if self.pypackages_enabled:
             self.pypackages_dir = config.pypackages_dir
@@ -138,16 +139,16 @@ class PackageManager(PyPIRepositoryMixin):
     @staticmethod
     def _refresh_packages() -> None:
         '''Reload package modules to refresh cache.'''
-        # TODO: refresh the cache not the module :/
+        # TODO: remove
         importlib.reload(pkg_resources)
 
     @staticmethod
     def get_dependencies(name: str) -> List[str]:
         '''Retrieve dependencies of a package.'''
+        # TODO: remove
         # TODO: try catch if package is not found
-        pkg = pkg_resources\
-            .working_set\
-            .by_key[name.lower()]  # type: ignore
+        PackageManager._refresh_packages()
+        pkg = pkg_resources.working_set.by_key[name.lower()]  # type: ignore
         return [str(req) for req in pkg.requires()]
 
     @staticmethod
@@ -167,89 +168,56 @@ class PackageManager(PyPIRepositoryMixin):
         self.__source_tree.save()
         self.__lockfile.save()
 
-    # def create_paths(self) -> None:
-    #     '''Create package paths.'''
-    #     # TODO: should depend on driver
-    #     if self.pypackages_enabled:
-    #         self.pypackages_dir = os.path.join(os.getcwd(), '__pypackages__')
-    #         # self.pypackages_libs = [
-    #         #     os.path.join(f"{self.pypackages_dir}, lib"),
-    #         #     os.path.join(f"{self.pypackages_dir}, lib64"),
-    #         # ]
-    #         self.distribution.create_pypackages_dir(
-    #             base_dir=self.pypackages_dir
-    #         )
-    #     # print(site.getsitepackages())
-
-    def list(self, versions: bool = False) -> None:
-        '''List installed packages.'''
-        if versions:
-            for k, v in self.distribution.packages:
-                print("{k} {v}".format(k=k, v=v))
-        else:
-            print('\n'.join(self.distribution.names))
-
-    def __get_options(self, dev: bool = False) -> Dict[str, Any]:
-        '''Get package management options.'''
-        # TODO: need to figure out how to separate dev/app modules
-        if self.pypackages_enabled:  # and not dev:
-            self.options['target'] = self.pypackages_dir
-        return self.options
-
     # Install package
     def __install_wheel(
         self,
-        package: str,
         filepath: str,
         force: bool,
         upgrade: bool,
         options: dict
     ) -> None:
-        '''Add package to distribution.'''
+        '''Install wheel to selected paths.'''
         # create tempdir yield
         paths = self.distribution.create_pypackages()
         wheel = Wheel(filepath)
         wheel.install(paths=paths, maker=ScriptMaker(None, None))
 
-    def _install_package(self, package: str, dev: bool = False) -> None:
+    def __install_sdist(
+        self,
+        filepath: str,
+        force: bool,
+        upgrade: bool,
+        options: dict
+    ) -> None:
+        '''Install source distribution to selected paths.'''
+        ...
+
+    def _install_package(
+        self, package: Distribution, dev: bool = False
+    ) -> None:
         '''Perform package installation.'''
-        # FIXME: duplication with install()
-        name, version = PackageManager.get_name(package)
-        options = self.__get_options()
-        # TODO: Should dependencies be nested...
         with TemporaryDirectory() as temp_dir:
+            # TODO: multi-threading
             filepath = self.download_package(package, temp_dir, digests=[])
             if filepath:
+                # TODO: download all packages before install
                 self.__install_wheel(
-                    name, filepath, self.force, self.update, options
+                    filepath, self.force, self.update, self.options
                 )
+                # TODO: if not legacy egg
+                # self.__install_sdist(
+                #     package, filepath, self.force, self.update, options
+                # )
+                # TODO: lock should happen here
             else:
                 print('package not found')
-
-        # if self.__lockfile.is_locked(name, dev):
-        #     # TODO: hashes were not working
-        #     # package_lock = self.__lockfile.retrieve_lock(name, dev)
-        #     # hashes = ['--hash=' + x['hash'] for x in package_lock['hashes']]
-        #     options = self.__get_pip_options()  # + hashes
-        #     pkgmgr.install(
-        #         name, self.force, self.update, options=options
-        #     )
-        # else:
-        #     options = self.__get_pip_options()
-        #     # TODO: Should dependencies be nested...
-        #     pkgmgr.install(package, self.force, self.update, options)
-        #     print(pkgmgr.installed_packages)
-        #     version = self.get_version(name)
-        #     self.__lockfile.add_lock(name, version, dev)
-
-        PackageManager._refresh_packages()
-        for dependency in PackageManager.get_dependencies(name):
-            self._install_package(dependency, dev)
+        for dependency in package.run_requires:
+            self._install_package(locate(dependency), dev)
 
     # TODO: Split dependency lookup and install
     def install(
         self,
-        package: str,
+        package_version: str,
         dev: bool = False,
         python: Optional[str] = None,
         platform: Optional[str] = None,
@@ -258,54 +226,60 @@ class PackageManager(PyPIRepositoryMixin):
     ) -> None:
         '''Install package and dependencies.'''
         # self.distribution.create_pypackages()
-        name, version = PackageManager.get_name(package)
-        self.__source_tree.add_dependency(name, version, dev)
+        package = locate(package_version)
+        self.__source_tree.add_dependency(package, dev)
         self._install_package(package, dev)
         self.save()
 
     # Uninstall package
     def __remove_package(self, name: str) -> None:
         '''Remove package from distribution.'''
-        print(f"uninstall {name}")
+        paths = []
+        dist = self.distribution.get_distribution(name)
+        paths.append(dist.path)
+        paths.append(
+            os.path.abspath(os.path.join(dist.path, '..', name)).lower()
+        )
+        # TODO: need to add distribution resource paths
+        for p in paths:
+            if os.path.exists(p) and os.path.isdir(p):
+                shutil.rmtree(p)
+            else:
+                print(f"{name} uninstall path does not exist")
 
-    def _uninstall_package(self, package: str) -> None:
+    def _uninstall_package(self, package: Distribution) -> None:
         '''Perform package uninstall tasks.'''
-        name, version = PackageManager.get_name(package)
-        print(name, version)
-        # options = self.__get_options()
-
-        print(self.distribution)
-        if self.distribution.is_installed(name):
-            print('installed')
-            for dependency in PackageManager.get_dependencies(
-                name
-            ):
+        if self.distribution.is_installed(package.name):
+            for dependency in package.run_requires:
                 self.uninstall(dependency)
-            self.__remove_package(name)
+            self.__remove_package(package.name)
             # self.__lockfile.remove_lock(name)
         else:
-            print('not installed')
-            print("{p} is not installed".format(p=name))
+            print("{p} is not installed".format(p=package.name))
 
-    def uninstall(self, package: str) -> None:
+    def uninstall(self, name: str) -> None:
         '''Uninstall package and dependencies.'''
-        self.__source_tree.remove_dependency(package)
-        self._uninstall_package(package)
+        # TODO: compare removed dependencies with remaining
+        self.__source_tree.remove_dependency(name)
+        self._uninstall_package(locate(name))
+        self.save()
 
     # Upgrade package
-    def upgrade(self, package: str = 'all', force: bool = False) -> None:
+    def upgrade(
+        self, package_version: str = 'all', force: bool = False
+    ) -> None:
         '''Upgrade/downgrade package and dependencies.'''
-        name, version = PackageManager.get_name(package)
-
-        if package != 'all' and self.distribution.is_installed(name):
-            self.distribution.upgrade(package, force)
-            # version = (
-            #     self.distribution.get_version(name)
-            # )
-            # if self.__lockfile.is_locked(name):
-            #     self.__lockfile.update_lock(name, version)
-            # else:
-            #     self.__lockfile.add_lock(name, version)
+        if package_version != 'all':
+            package = locate(package_version)
+            if self.distribution.is_installed(package.name):
+                self.distribution.upgrade(package, force)
+                # version = (
+                #     self.distribution.get_version(name)
+                # )
+                # if self.__lockfile.is_locked(name):
+                #     self.__lockfile.update_lock(name, version)
+                # else:
+                #     self.__lockfile.add_lock(name, version)
         else:
             # TODO: iterate and update all locks
             self.distribution.upgrade_all()
