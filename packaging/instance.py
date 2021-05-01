@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # copyright: (c) 2020 by Jesse Johnson.
 # license: Apache 2.0, see LICENSE for more details.
-'''Provide configuration management for pkgmgr.'''
+'''Provide configuration management for packaging.'''
 
 from . import config
 from .config import Config

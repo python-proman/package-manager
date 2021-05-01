@@ -1,8 +1,8 @@
-# Package Manager for proman
+# proman-packaging
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://travis-ci.org/python-proman/proman-pkgmgr.svg?branch=master)](https://travis-ci.org/python-proman/proman-pkgmgr)
-[![codecov](https://codecov.io/gh/python-proman/proman-pkgmgr/branch/master/graph/badge.svg)](https://codecov.io/gh/python-proman/proman-pkgmgr)
+[![Build Status](https://travis-ci.org/python-proman/proman-packaging.svg?branch=master)](https://travis-ci.org/python-proman/proman-packaging)
+[![codecov](https://codecov.io/gh/python-proman/proman-packaging/branch/master/graph/badge.svg)](https://codecov.io/gh/python-proman/proman-packaging)
 
 ## Overview
 
@@ -10,4 +10,4 @@ Simple package manager for Python.
 
 ## Install
 
-`pip install proman-pkgmgr`
+`pip install proman-packaging`

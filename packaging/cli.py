@@ -5,25 +5,28 @@
 
 import atexit
 import json
+import logging
 import os
-from typing import List, Optional
+from typing import Optional
 
 from . import config as cfg, distributions
 from .config import Config
-from .distributions import LocalDistribution
+from .distributions import LocalDistributionPath
 from .package_manager import PackageManager
 from .source_tree import LockManager, SourceTreeManager
+
+logger = logging.getLogger(__name__)
 
 source_tree_cfg = Config(filepath=cfg.pyproject_path, writable=True)
 lock_cfg = Config(filepath=cfg.lock_path, writable=True)
 source_tree_mgr = SourceTreeManager(source_tree_cfg)
 lock_mgr = LockManager(lock_cfg)
 
-local_distribution = LocalDistribution()
+local_distribution = LocalDistributionPath()
 local_distribution.load_path()
 atexit.register(local_distribution.remove_path)
 
-pkgmgr = PackageManager(
+packaging = PackageManager(
     source_tree=source_tree_mgr,
     lock=lock_mgr,
     distribution=local_distribution,
@@ -55,15 +58,15 @@ def init(name: str) -> None:
         print('project is already initialized')
 
 
-def info(name: str) -> None:
+def info(name: str, output: str = None) -> None:
     '''Get package info.'''
-    info = pkgmgr.get_package_info(name)
+    info = packaging.get_package_info(name)
     print(json.dumps(info, indent=2))
 
 
 def download(name: str, dest: str = '.') -> None:
     '''Download packages.'''
-    pkgmgr.download_package(name, dest)
+    packaging.download_package(name, dest)
 
 
 def install(
@@ -93,7 +96,7 @@ def install(
 
     '''
     if not name.startswith('-'):
-        pkgmgr.install(name, dev, python, platform, optional, prerelease)
+        packaging.install(name, dev, python, platform, optional, prerelease)
     else:
         print('error: not a valid install argument')
 
@@ -101,7 +104,7 @@ def install(
 def uninstall(name: str) -> None:
     '''Uninstall packages.'''
     if not name.startswith('-'):
-        pkgmgr.uninstall(name)
+        packaging.uninstall(name)
     else:
         print('error: not a valid install argument')
 
@@ -157,7 +160,7 @@ def search(
     operation: Optional[str] = None,
 ) -> None:
     '''Search PyPI for packages.'''
-    packages = pkgmgr.search(
+    packages = packaging.search(
         query={
             'name': name,
             'version': version,
@@ -194,7 +197,7 @@ def search(
 
 # def hash(package: str, algorithm: str = 'sha256') -> None:
 #     '''Compute hashes of package archives.'''
-#     print(pkgmgr.lookup_hashes(package))
+#     print(packaging.lookup_hashes(package))
 
 
 # def completion() -> None:

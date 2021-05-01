@@ -3,7 +3,7 @@
 
 from invoke import call, task
 
-from proman_pkgmgr import __version__
+from packaging import __version__
 
 
 if 'dev' in __version__ or 'rc' in __version__:
@@ -55,13 +55,13 @@ def unit_test(ctx, capture=None):
 def static_analysis(ctx):
     '''Perform static code analysis on imports.'''
     ctx.run('safety check')
-    ctx.run('bandit -r proman_pkgmgr')
+    ctx.run('bandit -r packaging')
 
 
 @task
 def coverage(ctx, report=None):
     '''Perform coverage checks for tests.'''
-    args = ['--cov=proman_pkgmgr']
+    args = ['--cov=packaging']
     if report:
         args.append('--cov-report={}'.format(report))
     ctx.run("pytest {} ./tests/".format(' '.join(args)))
@@ -136,6 +136,6 @@ def clean(ctx):
     paths.append('**/__pypackages__')
     paths.append('**/__pycache__')
     paths.append('**/*.pyc')
-    paths.append('proman-pkgmgr.egg-info')
+    paths.append('proman-packaging.egg-info')
     for path in paths:
         ctx.run("rm -rf {}".format(path))

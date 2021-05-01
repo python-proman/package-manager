@@ -11,7 +11,7 @@ from compendium.config_manager import ConfigFile
 
 # from . import exception
 
-INDEX_URL = 'https://test.pypi.org/'
+INDEX_URL = 'https://pypi.org/'
 VENV_PATH = os.getenv('VIRTUAL_ENV', None)
 PATHS = [VENV_PATH] if VENV_PATH else []
 

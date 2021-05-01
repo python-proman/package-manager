@@ -3,10 +3,11 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Manage local distributions.'''
 
+import logging
 import os
 import site
 import sys
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from distlib.database import Distribution, DistributionPath
 # from distlib.index import PackageIndex
@@ -14,12 +15,15 @@ from distlib.database import Distribution, DistributionPath
 # from distlib.scripts import ScriptMaker
 # from distlib.wheel import Wheel
 from importlib_metadata import metadata
+from importlib_metadata._meta import PackageMetadata
 import hashin
 
 from . import config
 
+logger = logging.getLogger(__name__)
 
-class DistributionMixin(DistributionPath):
+
+class DistributionPathMixin(DistributionPath):
     @property
     def packages(self) -> List[Distribution]:
         '''List installed packages.'''
@@ -38,17 +42,17 @@ class DistributionMixin(DistributionPath):
         )
 
 
-class SystemDistribution(DistributionMixin):
+class SystemDistributionPath(DistributionPathMixin):
     '''Manage system distributions.'''
     ...
 
 
-class GlobalDistribution(DistributionMixin):
+class GlobalDistributionPath(DistributionPathMixin):
     '''Manage global distributions.'''
     ...
 
 
-class LocalDistribution(DistributionMixin):
+class LocalDistributionPath(DistributionPathMixin):
     '''Manage local distributions.'''
 
     def __init__(
@@ -89,11 +93,11 @@ class LocalDistribution(DistributionMixin):
 
     def create_pypackages(
         self, base_dir: Optional[str] = None
-    ) -> Dict[str, str]:
+    ) -> None:
         '''Create pypackages directory.'''
         if not os.path.exists(self.dist_dir):
             os.makedirs(self.dist_dir)
-        paths = {
+        self.paths = {
             'prefix': self.dist_dir,
             'purelib': f"{self.dist_dir}/lib",
             'platlib': f"{self.dist_dir}/lib64",
@@ -101,11 +105,10 @@ class LocalDistribution(DistributionMixin):
             'headers': f"{self.dist_dir}/src",
             'data': f"{self.dist_dir}/share",
         }
-        for k, v in paths.items():
+        for k, v in self.paths.items():
             if k != 'prefix':
                 os.makedirs(os.path.join(self.dist_dir, v), exist_ok=True)
         # self.load_path()
-        return paths
 
 
 def get_site_packages_paths() -> List[str]:
@@ -130,7 +133,7 @@ def freeze() -> None:
     )
 
 
-def show_package_metadata(name: str) -> None:
+def show_package_metadata(name: str) -> PackageMetadata:
     '''Show information about installed packages.'''
     return metadata(name)
 
