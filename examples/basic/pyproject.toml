@@ -3,9 +3,10 @@
 authors = ["Jesse P. Johnson"]
 description = ""
 name = "test"
-version = "0.0.1"
+version = "0.1.0"
 
 [tool.proman.dependencies]
+Flask = "1.1.2"
 flask = "1.1.2"
 
 [tool.proman.dev-dependencies]

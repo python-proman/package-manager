@@ -3,7 +3,7 @@
 
 from invoke import call, task
 
-from packaging import __version__
+from proman_packaging import __version__
 
 
 if 'dev' in __version__ or 'rc' in __version__:
@@ -55,13 +55,13 @@ def unit_test(ctx, capture=None):
 def static_analysis(ctx):
     '''Perform static code analysis on imports.'''
     ctx.run('safety check')
-    ctx.run('bandit -r packaging')
+    ctx.run('bandit -r proman_packaging')
 
 
 @task
 def coverage(ctx, report=None):
     '''Perform coverage checks for tests.'''
-    args = ['--cov=packaging']
+    args = ['--cov=proman_packaging']
     if report:
         args.append('--cov-report={}'.format(report))
     ctx.run("pytest {} ./tests/".format(' '.join(args)))

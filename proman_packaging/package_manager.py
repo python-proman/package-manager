@@ -16,17 +16,16 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
 
 from distlib.database import (
-    Distribution, EggInfoDistribution, InstalledDistribution
+    Distribution, DistributionPath, EggInfoDistribution, InstalledDistribution
 )
 from distlib.index import PackageIndex
-from distlib.locators import locate
+from distlib.locators import locate, Locator
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 import urllib3
 
 from . import config
 # from .config import Config
-from .distributions import LocalDistributionPath
 from .source_tree import LockManager, SourceTreeManager
 
 http = urllib3.PoolManager()
@@ -130,7 +129,8 @@ class PackageManager(PyPIRepositoryMixin):
         self,
         source_tree: SourceTreeManager,
         lock: LockManager,
-        distribution: LocalDistributionPath,
+        distribution: DistributionPath,
+        locator: Locator,
         force: bool = False,
         update: bool = False,
         pypackages_enabled: bool = True,
@@ -140,6 +140,7 @@ class PackageManager(PyPIRepositoryMixin):
         self.__source_tree = source_tree
         self.__lockfile = lock
         self.distribution_path = distribution
+        self.locator = locator
 
         self.force = force
         self.update = update
@@ -172,6 +173,11 @@ class PackageManager(PyPIRepositoryMixin):
             )
             dependencies = dependencies + sub_dependencies
         return dependencies
+
+    def get_digests(self, package_version: str) -> Dict[str, Any]:
+        '''Provide access to digests when not locally available.'''
+        package = self.locator.locate(package_version)
+        return package.digests
 
     def save(self) -> None:
         '''Save each configuration.'''
@@ -231,13 +237,6 @@ class PackageManager(PyPIRepositoryMixin):
                     )
                 else:
                     print('no supported distribution found')
-                installed = (
-                    self.distribution_path.get_distribution(package.name)
-                )
-                print(installed)
-                # XXX: not getting hashes due to locaters/cache :/
-                if installed_dist.digests == {}:
-                    installed_dist.digests = release['digests']
                 return installed_dist
             else:
                 print('package could not be downloaded')
@@ -261,6 +260,7 @@ class PackageManager(PyPIRepositoryMixin):
         self.distribution_path.clear_cache()
         self.distribution_path.create_pypackages()
         package = locate(package_version)
+        # package = self.locator.locate(package_version)
         if self.distribution_path.is_installed(package.name):
             print('package is installed')
             # check source tree
@@ -295,18 +295,21 @@ class PackageManager(PyPIRepositoryMixin):
                 for future in as_completed(jobs):
                     result = future.result()
                     if result:
-                        print(
-                            '---', result.key in [x.key for x in dependencies]
-                        )
-                        # lock = None
-                        for x in dependencies:
-                            # print(x.name, result.name)
-                            for i in x.__dict__.items():
-                                print(i)
-                            # if x.key == result.key:
-                            #     lock = x
-                            #     print(lock.digests or lock.digest)
-                        self.__lockfile.add_lock(result, dev)
+                        # print(
+                        #     '---', result.key in [x.key for x in dependencies]
+                        # )
+                        installed_dependency = [
+                          x
+                          for x in dependencies
+                          if x.key == result.key
+                        ][0]
+                        # XXX: not getting hashes due to locaters/cache :/
+                        if installed_dependency.digests == {}:
+                            installed_dependency.digests = (
+                                self.get_digests(package_version)
+                            )
+                        print(installed_dependency)
+                        self.__lockfile.add_lock(installed_dependency, dev)
         self.save()
 
     # Uninstall package

@@ -8,6 +8,9 @@ import json
 import logging
 import os
 from typing import Optional
+from urllib.parse import urljoin
+
+from distlib.locators import PyPIJSONLocator
 
 from . import config as cfg, distributions
 from .config import Config
@@ -26,10 +29,13 @@ local_distribution = LocalDistributionPath()
 local_distribution.load_path()
 atexit.register(local_distribution.remove_path)
 
-packaging = PackageManager(
+locator = PyPIJSONLocator(urljoin(cfg.INDEX_URL, 'pypi'))
+
+package_manager = PackageManager(
     source_tree=source_tree_mgr,
     lock=lock_mgr,
     distribution=local_distribution,
+    locator=locator,
     force=False,
     update=False,
     options={}
@@ -60,13 +66,13 @@ def init(name: str) -> None:
 
 def info(name: str, output: str = None) -> None:
     '''Get package info.'''
-    info = packaging.get_package_info(name)
+    info = package_manager.get_package_info(name)
     print(json.dumps(info, indent=2))
 
 
 def download(name: str, dest: str = '.') -> None:
     '''Download packages.'''
-    packaging.download_package(name, dest)
+    package_manager.download_package(name, dest)
 
 
 def install(
@@ -96,7 +102,9 @@ def install(
 
     '''
     if not name.startswith('-'):
-        packaging.install(name, dev, python, platform, optional, prerelease)
+        package_manager.install(
+            name, dev, python, platform, optional, prerelease
+        )
     else:
         print('error: not a valid install argument')
 
@@ -104,7 +112,7 @@ def install(
 def uninstall(name: str) -> None:
     '''Uninstall packages.'''
     if not name.startswith('-'):
-        packaging.uninstall(name)
+        package_manager.uninstall(name)
     else:
         print('error: not a valid install argument')
 
@@ -160,7 +168,7 @@ def search(
     operation: Optional[str] = None,
 ) -> None:
     '''Search PyPI for packages.'''
-    packages = packaging.search(
+    packages = package_manager.search(
         query={
             'name': name,
             'version': version,
@@ -197,7 +205,7 @@ def search(
 
 # def hash(package: str, algorithm: str = 'sha256') -> None:
 #     '''Compute hashes of package archives.'''
-#     print(packaging.lookup_hashes(package))
+#     print(package_manager.lookup_hashes(package))
 
 
 # def completion() -> None:

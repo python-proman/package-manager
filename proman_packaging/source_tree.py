@@ -55,7 +55,7 @@ class SourceTreeManager(ProjectSettingsMixin):
         self, package: Distribution, dev: bool = False,
     ) -> None:
         '''Add dependency to configuration.'''
-        if not self.is_dependency(package.name, dev):
+        if not self.is_dependency(package.key, dev):
             if package.version is None:
                 version = '*'
             else:
@@ -155,19 +155,19 @@ class LockManager(ProjectSettingsMixin):
 
     def add_lock(
         self,
-        package: InstalledDistribution,
+        package: Distribution,
         dev: bool = False,
     ) -> None:
         '''Add package lock to configuration.'''
         if not self.is_locked(package.name, dev):
             # package_hashes = self.lookup_hashes(package.name, package.version)
-            print(package.digest)
+            print('package', package.__dict__)
             lock = {
                 'name': package.name,
                 'version': package.version,
-                'digests': package.digests,
+                'digests': [':'.join(v) for k, v in package.digests.items()]
             }
-            # print('lock', lock)
+            print('lock', lock)
             self.__settings.append(f"/{self.dependency_type(dev)}", lock)
         else:
             print('package lock already exists')
