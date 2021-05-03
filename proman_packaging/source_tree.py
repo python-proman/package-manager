@@ -65,13 +65,12 @@ class SourceTreeManager(ProjectSettingsMixin):
                 version,
             )
 
-    def remove_dependency(self, name: str) -> None:
+    def remove_dependency(self, name: str, dev: bool = False) -> None:
         '''Remove dependency from configuration.'''
-        for dev in [True, False]:
-            if self.is_dependency(name, dev):
-                self.__settings.delete(
-                    f"/tool/proman/{self.dependency_type(dev)}/{name}"
-                )
+        if self.is_dependency(name, dev):
+            self.__settings.delete(
+                f"/tool/proman/{self.dependency_type(dev)}/{name}"
+            )
 
     def update_dependency(
         self, package: Distribution,
@@ -125,7 +124,7 @@ class LockManager(ProjectSettingsMixin):
         result = [
             x
             for x in self.__settings.retrieve(f"/{self.dependency_type(dev)}")
-            if x['package'] == name
+            if x['name'] == name
         ]
         return result[0] if result else {}
 
@@ -172,7 +171,7 @@ class LockManager(ProjectSettingsMixin):
         else:
             print('package lock already exists')
 
-    def remove_lock(self, name: str) -> None:
+    def remove_lock(self, name: str, dev: bool = False) -> None:
         '''Remove package lock from configuration.'''
         for type in ['dev-dependencies', 'dependencies']:
             self.__settings.set(
@@ -180,7 +179,7 @@ class LockManager(ProjectSettingsMixin):
                 [
                     x
                     for x in self.__settings.retrieve(type)
-                    if not (x['package'] == name)
+                    if not (x['name'] == name)
                 ],
             )
 
