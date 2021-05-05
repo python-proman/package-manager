@@ -818,14 +818,6 @@ security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,!=1.5.7)", "win-inet-pton"]
 
 [[package]]
-name = "requirements-parser"
-version = "0.2.0"
-description = "Parses Pip requirement files"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "ruamel.yaml"
 version = "0.16.13"
 description = "ruamel.yaml is a YAML parser/emitter that supports roundtrip preservation of comments, seq/map flow style, and map key order"
@@ -861,14 +853,6 @@ Click = ">=6.0"
 dparse = ">=0.5.1"
 packaging = "*"
 requests = "*"
-
-[[package]]
-name = "semantic-version"
-version = "2.8.5"
-description = "A library implementing the 'SemVer' scheme."
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "six"
@@ -1010,7 +994,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "c9dff06505d5ef56e088b8b1dc13bc0da7909584635264135bc33742b140e2e7"
+content-hash = "8c375b321402e5d1557f75f6b63693bd1297fbb0a10bb0fa7de826ebbbb21d33"
 
 [metadata.files]
 altgraph = [
@@ -1481,10 +1465,6 @@ requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
 ]
-requirements-parser = [
-    {file = "requirements-parser-0.2.0.tar.gz", hash = "sha256:5963ee895c2d05ae9f58d3fc641082fb38021618979d6a152b6b1398bd7d4ed4"},
-    {file = "requirements_parser-0.2.0-py2-none-any.whl", hash = "sha256:76650b4a9d98fc65edf008a7920c076bb2a76c08eaae230ce4cfc6f51ea6a773"},
-]
 "ruamel.yaml" = [
     {file = "ruamel.yaml-0.16.13-py2.py3-none-any.whl", hash = "sha256:64b06e7873eb8e1125525ecef7345447d786368cadca92a7cd9b59eae62e95a3"},
     {file = "ruamel.yaml-0.16.13.tar.gz", hash = "sha256:bb48c514222702878759a05af96f4b7ecdba9b33cd4efcf25c86b882cef3a942"},
@@ -1516,10 +1496,6 @@ requirements-parser = [
 safety = [
     {file = "safety-1.10.3-py2.py3-none-any.whl", hash = "sha256:5f802ad5df5614f9622d8d71fedec2757099705c2356f862847c58c6dfe13e84"},
     {file = "safety-1.10.3.tar.gz", hash = "sha256:30e394d02a20ac49b7f65292d19d38fa927a8f9582cdfd3ad1adbbc66c641ad5"},
-]
-semantic-version = [
-    {file = "semantic_version-2.8.5-py2.py3-none-any.whl", hash = "sha256:45e4b32ee9d6d70ba5f440ec8cc5221074c7f4b0e8918bdab748cc37912440a9"},
-    {file = "semantic_version-2.8.5.tar.gz", hash = "sha256:d2cb2de0558762934679b9a104e82eca7af448c9f4974d1f3eeccff651df8a54"},
 ]
 six = [
     {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},

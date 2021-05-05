@@ -126,13 +126,3 @@ def show_package_metadata(name: str) -> PackageMetadata:
 # def check() -> None:
 #     '''Verify installed packages have compatible dependencies.'''
 #     pass
-
-
-# def wheel() -> None:
-#     '''Build wheels from your requirements.'''
-#     pass
-
-
-# def hash() -> None:
-#     '''Compute hashes of package archives.'''
-#     pass

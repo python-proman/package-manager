@@ -10,7 +10,6 @@ from distlib.database import Distribution
 # from distlib.locators import locate
 # from distlib.scripts import ScriptMaker
 # from distlib.wheel import Wheel
-# from semantic_version import Version
 
 from transitions import Machine
 
