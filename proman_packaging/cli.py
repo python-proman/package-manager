@@ -137,16 +137,11 @@ def upgrade(
         package_manager.upgrade(name, force)
 
 
-# def freeze() -> None:
-#     '''Output installed packages in requirements format.'''
-#     distributions.freeze()
-
-
-def list(versions: bool = False) -> None:
+def list(versions: bool = True) -> None:
     '''List installed packages.'''
     if versions:
-        for k, v in local_distribution.packages:
-            print("{k} {v}".format(k=k, v=v))
+        for k in local_distribution.packages:
+            print(k.name.ljust(25), k.version.ljust(15))
     else:
         print('\n'.join(local_distribution.package_names))
 
@@ -218,16 +213,6 @@ def search(
         )
 
 
-# def wheel() -> None:
+# def build() -> None:
 #     '''Build wheels from your requirements.'''
-#     pass
-
-
-# def hash(package: str, algorithm: str = 'sha256') -> None:
-#     '''Compute hashes of package archives.'''
-#     print(package_manager.lookup_hashes(package))
-
-
-# def completion() -> None:
-#     '''A helper command used for command completion.'''
 #     pass

@@ -3,11 +3,10 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Resolve package dependencies.'''
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from distlib.database import Distribution, InstalledDistribution
+from distlib.database import Distribution
 # from semantic_version import Version
-import hashin
 
 # from . import exception
 from .config import Config
@@ -36,6 +35,12 @@ class SourceTreeManager(ProjectSettingsMixin):
     def is_dependency(self, package: str, dev: bool = False) -> bool:
         '''Check if dependency exists.'''
         return package in self.__settings.retrieve(
+            f"/tool/proman/{self.dependency_type(dev)}"
+        )
+
+    def get_dependencies(self, dev: bool = False) -> List[Dict[str, Any]]:
+        '''Retrieve depencency configuration.'''
+        return self.__settings.retrieve(
             f"/tool/proman/{self.dependency_type(dev)}"
         )
 
@@ -92,25 +97,6 @@ class LockManager(ProjectSettingsMixin):
         '''Initialize lock configuration settings.'''
         self.__settings = lock_config
 
-    def lookup_hashes(
-        self,
-        package: str,
-        version: Optional[str] = None,
-    ) -> Dict[str, Any]:
-        '''Lookup package hash from configuration.'''
-        # TODO: replace with distlib hashes
-        package_hashes = hashin.get_package_hashes(
-            package=package,
-            version=version,
-            algorithm=self.__settings.hash_algorithm,
-            python_versions=self.__settings.python_versions,
-            verbose=False,
-            include_prereleases=self.__settings.include_prereleases,
-            lookup_memory=self.__settings.lookup_memory,
-            index_url=self.__settings.index_url,
-        )
-        return package_hashes
-
     def is_locked(self, name: str, dev: bool = False) -> bool:
         '''Check if package lock is in configuration.'''
         result = any(
@@ -132,29 +118,31 @@ class LockManager(ProjectSettingsMixin):
         ]
         return result[0] if result else {}
 
-    def update_lock(
-        self,
-        package: InstalledDistribution,
-        dev: bool = False
-    ) -> None:
-        '''Update existing package lock in configuration.'''
-        update_lock = self.lookup_hashes(package.name, package.version)
-        package_lock = self.get_lock(package.name, dev)
+    # def update_lock(
+    #     self,
+    #     package: InstalledDistribution,
+    #     dev: bool = False
+    # ) -> None:
+    #     '''Update existing package lock in configuration.'''
+    #     update_lock = self.lookup_hashes(package.name, package.version)
+    #     package_lock = self.get_lock(package.name, dev)
 
-        # TODO: handle version empty strings
-        # if Version(update_lock['version']) > Version(package_lock['version']):
-        # print(update_lock['package'])
-        self.__settings.set(
-            f"/{self.dependency_type(dev)}",
-            [
-                x
-                for x in self.__settings.retrieve(
-                    f"/{self.dependency_type(dev)}"
-                )
-                if not (x['package'] == package_lock['package'])
-            ],
-        )
-        self.__settings.append(f"/{self.dependency_type(dev)}", update_lock)
+    #     # TODO: handle version empty strings
+    #     # if Version(
+    #     #     update_lock['version']) > Version(package_lock['version']
+    #     # ):
+    #     # print(update_lock['package'])
+    #     self.__settings.set(
+    #         f"/{self.dependency_type(dev)}",
+    #         [
+    #             x
+    #             for x in self.__settings.retrieve(
+    #                 f"/{self.dependency_type(dev)}"
+    #             )
+    #             if not (x['package'] == package_lock['package'])
+    #         ],
+    #     )
+    #     self.__settings.append(f"/{self.dependency_type(dev)}", update_lock)
 
     def add_lock(
         self,

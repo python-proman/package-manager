@@ -185,17 +185,17 @@ class PackageManager(PyPIRepositoryMixin):
         self.__source_tree.save()
         self.__lockfile.save()
 
-    def get_install(self, package: Distribution) -> Optional[Distribution]:
-        '''Check installed package is installed.'''
-        install = next(
-            (
-                x
-                for x in self.distribution_path.packages
-                if x.key == list(package.keys())[0]
-            ),
-            None
-        )
-        return install
+    # def get_install(self, package: Distribution) -> Optional[Distribution]:
+    #     '''Check installed package is installed.'''
+    #     install = next(
+    #         (
+    #             x
+    #             for x in self.distribution_path.packages
+    #             if x.key == list(package.keys())[0]
+    #         ),
+    #         None
+    #     )
+    #     return install
 
     # Install package
     def __install_wheel(
@@ -347,7 +347,7 @@ class PackageManager(PyPIRepositoryMixin):
             self.save()
 
     # Uninstall package
-    def _uninstall_package(self, package: Distribution, dev: bool) -> None:
+    def __remove_package(self, package: Distribution, dev: bool) -> None:
         '''Perform package uninstall tasks.'''
         # paths to be removed
         paths = []
@@ -357,9 +357,12 @@ class PackageManager(PyPIRepositoryMixin):
         paths.append(dist.path)
 
         # add package paths
-        for x in finder(package.key).iterator(''):
-            print(package.key, x.name, x.is_container, x.path)
-            paths.append(x.path)
+        installed = self.distribution_path.get_distribution(package.name)
+        for filepath in installed.list_installed_files():
+            for path in self.distribution_path.path:
+                p = os.path.join(path, filepath[0].split(os.sep)[0])
+                if p not in paths:
+                    paths.append(p)
 
         # remove all paths
         for p in paths:
@@ -370,14 +373,14 @@ class PackageManager(PyPIRepositoryMixin):
             else:
                 print(f"{package.name} uninstall path does not exist")
 
-    def _perform_uninstall(
+    def _uninstall_package(
         self, package: Distribution, dev: bool, **kwargs: Any
     ) -> Optional[Union[EggInfoDistribution, InstalledDistribution]]:
         '''Perform coordination of installation processes.'''
         installed = None
         if self.distribution_path.is_installed(package.name):
             installed = self.distribution_path.get_distribution(package.name)
-            self._uninstall_package(installed, dev)
+            self.__remove_package(installed, dev)
             print('package uninstalled:', installed)
 
         locked = None
@@ -415,14 +418,14 @@ class PackageManager(PyPIRepositoryMixin):
             with ThreadPoolExecutor(max_workers=8) as executor:
                 jobs = [
                     executor.submit(
-                        self._perform_uninstall, dependency, dev, **kwargs
+                        self._uninstall_package, dependency, dev, **kwargs
                     )
                     for dependency in dependencies
                 ]
                 for future in as_completed(jobs):
                     result = future.result()
                     if result:
-                        print(result)
+                        print('result', result)
             self.save()
 
     # Upgrade package

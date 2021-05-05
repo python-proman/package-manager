@@ -6,6 +6,5 @@ name = "mock-project"
 version = "0.1.0"
 
 [tool.proman.dependencies]
-flask = "1.1.2"
 
 [tool.proman.dev-dependencies]

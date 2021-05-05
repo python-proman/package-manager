@@ -16,7 +16,6 @@ from distlib.database import Distribution, DistributionPath
 # from distlib.wheel import Wheel
 from importlib_metadata import metadata
 from importlib_metadata._meta import PackageMetadata
-import hashin
 
 from . import config
 
@@ -61,17 +60,18 @@ class LocalDistributionPath(DistributionPathMixin):
         include_egg: bool = False,
     ) -> None:
         '''Initialize local distribution.'''
-        self.dist_dir = os.path.join(
+        self.__dist_dir = os.path.join(
             config.pypackages_dir,
             f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}",
         )
         # TODO: use pth
-        paths.append(os.path.join(self.dist_dir, 'lib'))
-        paths.append(os.path.join(self.dist_dir, 'lib64'))
+        paths.append(os.path.join(self.__dist_dir, 'lib'))
+        paths.append(os.path.join(self.__dist_dir, 'lib64'))
         DistributionPath.__init__(self, paths, include_egg)
 
     def load_path(self) -> None:
         '''Add path to sys.path.'''
+        # TODO: implement pth
         for path in self.path:
             if os.path.isdir(path):
                 if path not in sys.path:
@@ -83,6 +83,7 @@ class LocalDistributionPath(DistributionPathMixin):
 
     def remove_path(self) -> None:
         '''Remove path from sys.path.'''
+        # TODO: implement pth
         for path in self.path:
             if path in sys.path:
                 sys.path.remove(path)
@@ -95,19 +96,19 @@ class LocalDistributionPath(DistributionPathMixin):
         self, base_dir: Optional[str] = None
     ) -> None:
         '''Create pypackages directory.'''
-        if not os.path.exists(self.dist_dir):
-            os.makedirs(self.dist_dir)
+        if not os.path.exists(self.__dist_dir):
+            os.makedirs(self.__dist_dir)
         self.paths = {
-            'prefix': self.dist_dir,
-            'purelib': f"{self.dist_dir}/lib",
-            'platlib': f"{self.dist_dir}/lib64",
-            'scripts': f"{self.dist_dir}/bin",
-            'headers': f"{self.dist_dir}/src",
-            'data': f"{self.dist_dir}/share",
+            'prefix': self.__dist_dir,
+            'purelib': f"{self.__dist_dir}/lib",
+            'platlib': f"{self.__dist_dir}/lib64",
+            'scripts': f"{self.__dist_dir}/bin",
+            'headers': f"{self.__dist_dir}/src",
+            'data': f"{self.__dist_dir}/share",
         }
         for k, v in self.paths.items():
             if k != 'prefix':
-                os.makedirs(os.path.join(self.dist_dir, v), exist_ok=True)
+                os.makedirs(os.path.join(self.__dist_dir, v), exist_ok=True)
         # self.load_path()
 
 
@@ -115,22 +116,6 @@ def get_site_packages_paths() -> List[str]:
     '''Get installed packages from site.'''
     # NOTE: site should probably be part of venv
     return site.getsitepackages()
-
-
-def freeze() -> None:
-    '''Output installed packages in requirements format.'''
-    hashin.run(
-        ['hashin'],
-        'requirements.txt',
-        'sha256',
-        # args.python_version,
-        # verbose=args.verbose,
-        # include_prereleases=args.include_prereleases,
-        # dry_run=args.dry_run,
-        # interactive=args.interactive,
-        # synchronous=args.synchronous,
-        # index_url=args.index_url
-    )
 
 
 def show_package_metadata(name: str) -> PackageMetadata:

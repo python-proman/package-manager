@@ -34,7 +34,7 @@ class Config(ConfigFile):
     filepath: str
     index_url: str = f"{INDEX_URL}simple"
     python_versions: tuple = ()
-    hash_algorithm: str = 'sha256'
+    digest_algorithm: str = 'sha256'
     include_prereleases: bool = False
     lookup_memory: Optional[str] = None
     writable: bool = True
