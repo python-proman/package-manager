@@ -3,7 +3,7 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Resolve package dependencies.'''
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from distlib.database import Distribution, InstalledDistribution
 # from semantic_version import Version
@@ -118,6 +118,10 @@ class LockManager(ProjectSettingsMixin):
             for p in self.__settings.retrieve(f"/{self.dependency_type(dev)}")
         )
         return result
+
+    def get_locks(self, dev: bool = False) -> List[Dict[str, Any]]:
+        '''Get all dependencies.'''
+        return self.__settings.retrieve(f"/{self.dependency_type(dev)}")
 
     def get_lock(self, name: str, dev: bool = False) -> Dict[str, Any]:
         '''Retrieve package lock from configuration.'''

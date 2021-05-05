@@ -9,7 +9,6 @@ import logging
 import os
 import re
 import shutil
-# import thread
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -18,8 +17,10 @@ from urllib.parse import urljoin
 from distlib.database import (
     Distribution, DistributionPath, EggInfoDistribution, InstalledDistribution
 )
+from distlib import DistlibException
 from distlib.index import PackageIndex
 from distlib.locators import locate, Locator
+from distlib.resources import finder
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 import urllib3
@@ -165,8 +166,8 @@ class PackageManager(PyPIRepositoryMixin):
     def get_dependencies(package: Distribution) -> List[Distribution]:
         '''Get package dependencies.'''
         dependencies = []
-        for package_version in package.run_requires:
-            dependency = locate(package_version)
+        for sequence in package.run_requires:
+            dependency = locate(sequence)
             dependencies.append(dependency)
             sub_dependencies = (
                 PackageManager.get_dependencies(dependency)
@@ -174,15 +175,27 @@ class PackageManager(PyPIRepositoryMixin):
             dependencies = dependencies + sub_dependencies
         return dependencies
 
-    def get_digests(self, package_version: str) -> Dict[str, Any]:
+    def get_digests(self, sequence: str) -> Dict[str, Any]:
         '''Provide access to digests when not locally available.'''
-        package = self.locator.locate(package_version)
+        package = self.locator.locate(sequence)
         return package.digests
 
     def save(self) -> None:
         '''Save each configuration.'''
         self.__source_tree.save()
         self.__lockfile.save()
+
+    def get_install(self, package: Distribution) -> Optional[Distribution]:
+        '''Check installed package is installed.'''
+        install = next(
+            (
+                x
+                for x in self.distribution_path.packages
+                if x.key == list(package.keys())[0]
+            ),
+            None
+        )
+        return install
 
     # Install package
     def __install_wheel(
@@ -194,11 +207,15 @@ class PackageManager(PyPIRepositoryMixin):
     ) -> InstalledDistribution:
         '''Install wheel to selected paths.'''
         wheel = Wheel(filepath)
-        return wheel.install(
-            paths=self.distribution_path.paths,
-            maker=ScriptMaker(None, None),
-            # bytecode_hashed_invalidation=True
-        )
+        try:
+            wheel.verify()
+            return wheel.install(
+                paths=self.distribution_path.paths,
+                maker=ScriptMaker(None, None),
+                # bytecode_hashed_invalidation=True
+            )
+        except DistlibException:
+            print('wheel did not pass validation')
 
     def __install_sdist(
         self,
@@ -221,10 +238,12 @@ class PackageManager(PyPIRepositoryMixin):
         )
         if release:
             # TODO: download all packages before install
+            print('----', release)
+            digests = list(kwargs.get('digests', []))
             filepath = self.download_package(
                 release,
                 kwargs['temp_dir'],
-                digests=list(kwargs.get('digests', []))
+                digests=digests
             )
             if filepath:
                 if release['packagetype'] == 'bdist_wheel':
@@ -252,12 +271,12 @@ class PackageManager(PyPIRepositoryMixin):
         installed = None
         if self.distribution_path.is_installed(package.name):
             installed = self.distribution_path.get_distribution(package.name)
-        print('package installed:', installed)
+            print('package installed:', installed)
 
         locked = None
         if self.__lockfile.is_locked(package.name, dev):
             locked = self.__lockfile.get_lock(package.name, dev)
-        print('package locked:', locked)
+            print('package locked:', locked)
 
         if not installed:
             if locked:
@@ -275,7 +294,7 @@ class PackageManager(PyPIRepositoryMixin):
 
     def install(
         self,
-        package_version: str,
+        sequence: Optional[str] = None,
         dev: bool = False,
         python: Optional[str] = None,
         platform: Optional[str] = None,
@@ -288,73 +307,68 @@ class PackageManager(PyPIRepositoryMixin):
         # self.distribution_path.clear_cache()
         self.distribution_path.create_pypackages()
 
-        package = locate(package_version)
-        # TODO: json/rpc does not include run_requires
-        # package = self.locator.locate(package_version)
+        if sequence:
+            package = locate(sequence)
+            # TODO: json/rpc does not include run_requires
+            # package = self.locator.locate(sequence)
 
-        self.__source_tree.add_dependency(package, dev)
+            self.__source_tree.add_dependency(package, dev)
+            dependencies = [package] + self.get_dependencies(package)
+        else:
+            dependencies = []
+            for lock in self.__lockfile.get_locks(dev):
+                # TODO: need better load from lockfile
+                dependencies.append(locate(lock['name']))
 
-        with TemporaryDirectory() as temp_dir:
-            kwargs['temp_dir'] = temp_dir
-            with ThreadPoolExecutor(max_workers=8) as executor:
-                dependencies = [package] + self.get_dependencies(package)
-                jobs = [
-                    executor.submit(
-                        self._perform_install, dependency, dev, **kwargs
-                    )
-                    for dependency in dependencies
-                ]
-                for future in as_completed(jobs):
-                    result = future.result()
-                    if result:
-                        # print(
-                        #     '---', result.key in [x.key for x in dependencies]
-                        # )
-                        installed = [
-                          x
-                          for x in dependencies
-                          if x.key == result.key
-                        ][0]
+        if dependencies != []:
+            with TemporaryDirectory() as temp_dir:
+                kwargs['temp_dir'] = temp_dir
+                with ThreadPoolExecutor(max_workers=8) as executor:
+                    jobs = [
+                        executor.submit(
+                            self._perform_install, dependency, dev, **kwargs
+                        )
+                        for dependency in dependencies
+                    ]
+                    for future in as_completed(jobs):
+                        result = future.result()
+                        if result:
+                            # print(
+                            #     '---',
+                            #     result.key in [x.key for x in dependencies]
+                            # )
+                            installed = [
+                              x
+                              for x in dependencies
+                              if x.key == result.key
+                            ][0]
 
-                        print(installed)
-        self.save()
-
-    def check_install(self, package: Distribution) -> Optional[Distribution]:
-        '''Check installed package is installed.'''
-        install = next(
-            (
-                x
-                for x in self.distribution_path.packages
-                if x.key == list(package.keys())[0]
-            ),
-            None
-        )
-        return install
+                            print(installed)
+            self.save()
 
     # Uninstall package
-    def __remove_package(self, name: str) -> None:
-        '''Remove package from distribution.'''
-        paths = []
-        dist = self.distribution_path.get_distribution(name)
-        paths.append(dist.path)
-        paths.append(
-            os.path.abspath(os.path.join(dist.path, '..', name)).lower()
-        )
-        # TODO: need to add distribution resource paths None
-        for p in paths:
-            if os.path.exists(p) and os.path.isdir(p):
-                shutil.rmtree(p)
-            else:
-                print(f"{name} uninstall path does not exist")
-
     def _uninstall_package(self, package: Distribution, dev: bool) -> None:
         '''Perform package uninstall tasks.'''
-        if self.distribution_path.is_installed(package.name):
-            for dependency in package.run_requires:
-                self.uninstall(dependency, dev)
-            self.__remove_package(package.name)
-        else:
-            print("{p} is not installed".format(p=package.name))
+        # paths to be removed
+        paths = []
+
+        # add distribution info path
+        dist = self.distribution_path.get_distribution(package.name)
+        paths.append(dist.path)
+
+        # add package paths
+        for x in finder(package.key).iterator(''):
+            print(package.key, x.name, x.is_container, x.path)
+            paths.append(x.path)
+
+        # remove all paths
+        for p in paths:
+            if os.path.exists(p) and os.path.isfile(p):
+                os.remove(p)
+            elif os.path.exists(p) and os.path.isdir(p):
+                shutil.rmtree(p)
+            else:
+                print(f"{package.name} uninstall path does not exist")
 
     def _perform_uninstall(
         self, package: Distribution, dev: bool, **kwargs: Any
@@ -364,48 +378,60 @@ class PackageManager(PyPIRepositoryMixin):
         if self.distribution_path.is_installed(package.name):
             installed = self.distribution_path.get_distribution(package.name)
             self._uninstall_package(installed, dev)
-        print('package uninstalled:', installed)
+            print('package uninstalled:', installed)
 
         locked = None
         if self.__lockfile.is_locked(package.name, dev):
             locked = self.__lockfile.get_lock(package.name, dev)
             self.__lockfile.remove_lock(package.name, dev)
-        print('package unlocked:', locked)
+            print('package unlocked:', locked)
         return installed
 
     def uninstall(
-        self, package_version: str, dev: bool = False, **kwargs: Any
+        self,
+        sequence: Optional[str] = None,
+        dev: bool = False,
+        **kwargs: Any
     ) -> None:
         '''Uninstall package and dependencies.'''
         # TODO: compare removed dependencies with remaining
-        package = locate(package_version)
-        # TODO: json/rpc does not include run_requires
-        # package = self.locator.locate(package_version)
 
-        if self.__source_tree.is_dependency(package.name, dev):
-            self.__source_tree.remove_dependency(package.name, dev)
+        if sequence:
+            package = locate(sequence)
+            # TODO: json/rpc does not include run_requires
+            # package = self.locator.locate(sequence)
 
-        with ThreadPoolExecutor(max_workers=8) as executor:
+            if package and self.__source_tree.is_dependency(package.name, dev):
+                self.__source_tree.remove_dependency(package.name, dev)
+
             dependencies = [package] + self.get_dependencies(package)
-            jobs = [
-                executor.submit(
-                    self._perform_uninstall, dependency, dev, **kwargs
-                )
-                for dependency in dependencies
-            ]
-            for future in as_completed(jobs):
-                result = future.result()
-                if result:
-                    print(result)
-        self.save()
+        else:
+            dependencies = []
+            for lock in self.__lockfile.get_locks(dev):
+                # TODO: need better load from lockfile
+                dependencies.append(locate(lock['name']))
+
+        if dependencies != []:
+            with ThreadPoolExecutor(max_workers=8) as executor:
+                jobs = [
+                    executor.submit(
+                        self._perform_uninstall, dependency, dev, **kwargs
+                    )
+                    for dependency in dependencies
+                ]
+                for future in as_completed(jobs):
+                    result = future.result()
+                    if result:
+                        print(result)
+            self.save()
 
     # Upgrade package
     def upgrade(
-        self, package_version: str = 'all', force: bool = False
+        self, sequence: Optional[str], force: bool = False
     ) -> None:
         '''Upgrade/downgrade package and dependencies.'''
-        if package_version != 'all':
-            package = locate(package_version)
+        if sequence:
+            package = locate(sequence)
             if self.distribution_path.is_installed(package.name):
                 self.distribution_path.upgrade(package, force)
                 # version = (
@@ -417,4 +443,5 @@ class PackageManager(PyPIRepositoryMixin):
                 #     self.__lockfile.add_lock(name, version)
         else:
             # TODO: iterate and update all locks
-            self.distribution_path.upgrade_all()
+            # self.distribution_path.upgrade_all()
+            print('need process to uninstall and update packages')

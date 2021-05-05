@@ -76,7 +76,7 @@ def download(name: str, dest: str = '.') -> None:
 
 
 def install(
-    name: str,
+    name: Optional[str],
     dev: bool = False,
     python: Optional[str] = None,
     platform: Optional[str] = None,
@@ -101,20 +101,40 @@ def install(
         restrict package to specific platform
 
     '''
-    if not name.startswith('-'):
+    if name and name.startswith('-'):
+        print('error: not a valid install argument')
+    else:
         package_manager.install(
             name, dev, python, platform, optional, prerelease
         )
-    else:
-        print('error: not a valid install argument')
 
 
-def uninstall(name: str) -> None:
+def uninstall(name: Optional[str]) -> None:
     '''Uninstall packages.'''
-    if not name.startswith('-'):
-        package_manager.uninstall(name)
-    else:
+    if name and name.startswith('-'):
         print('error: not a valid install argument')
+    else:
+        package_manager.uninstall(name)
+
+
+def upgrade(
+    name: Optional[str],
+    force: bool = False,
+) -> None:
+    '''Install package and dependencies.
+
+    Parameters
+    ----------
+    name: str
+        name of package to be installed
+    force: bool
+        force changes
+
+    '''
+    if name and name.startswith('-'):
+        print('error: not a valid install argument')
+    else:
+        package_manager.upgrade(name, force)
 
 
 # def freeze() -> None:
