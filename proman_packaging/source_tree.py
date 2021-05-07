@@ -6,7 +6,6 @@
 from typing import Any, Dict, List
 
 from distlib.database import Distribution
-# from semantic_version import Version
 
 # from . import exception
 from .config import Config
@@ -78,12 +77,11 @@ class SourceTreeManager(ProjectSettingsMixin):
             )
 
     def update_dependency(
-        self, package: Distribution,
+        self, package: Distribution, dev: bool = False
     ) -> None:
         '''Update existing dependency.'''
-        self.remove_dependency(package.name)
-        for dev in [True, False]:
-            self.add_dependency(package, dev)
+        self.remove_dependency(package.name, dev)
+        self.add_dependency(package, dev)
 
     def save(self) -> None:
         '''Update the source tree config.'''
@@ -118,31 +116,14 @@ class LockManager(ProjectSettingsMixin):
         ]
         return result[0] if result else {}
 
-    # def update_lock(
-    #     self,
-    #     package: InstalledDistribution,
-    #     dev: bool = False
-    # ) -> None:
-    #     '''Update existing package lock in configuration.'''
-    #     update_lock = self.lookup_hashes(package.name, package.version)
-    #     package_lock = self.get_lock(package.name, dev)
-
-    #     # TODO: handle version empty strings
-    #     # if Version(
-    #     #     update_lock['version']) > Version(package_lock['version']
-    #     # ):
-    #     # print(update_lock['package'])
-    #     self.__settings.set(
-    #         f"/{self.dependency_type(dev)}",
-    #         [
-    #             x
-    #             for x in self.__settings.retrieve(
-    #                 f"/{self.dependency_type(dev)}"
-    #             )
-    #             if not (x['package'] == package_lock['package'])
-    #         ],
-    #     )
-    #     self.__settings.append(f"/{self.dependency_type(dev)}", update_lock)
+    def update_lock(
+        self,
+        package: Distribution,
+        dev: bool = False
+    ) -> None:
+        '''Update existing package lock in configuration.'''
+        self.remove_lock(package.name, dev)
+        self.add_lock(package, dev)
 
     def add_lock(
         self,
@@ -165,15 +146,14 @@ class LockManager(ProjectSettingsMixin):
 
     def remove_lock(self, name: str, dev: bool = False) -> None:
         '''Remove package lock from configuration.'''
-        for type in ['dev-dependencies', 'dependencies']:
-            self.__settings.set(
-                type,
-                [
-                    x
-                    for x in self.__settings.retrieve(type)
-                    if not (x['name'] == name)
-                ],
-            )
+        self.__settings.set(
+            f"/{self.dependency_type(dev)}",
+            [
+                x
+                for x in self.get_locks(dev)
+                if not x['name'] == name
+            ],
+        )
 
     def save(self) -> None:
         '''Update the source tree config.'''

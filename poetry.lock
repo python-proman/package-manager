@@ -928,21 +928,6 @@ notebook = ["ipywidgets (>=6)"]
 telegram = ["requests"]
 
 [[package]]
-name = "transitions"
-version = "0.8.8"
-description = "A lightweight, object-oriented Python state machine implementation with many extensions."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-six = "*"
-
-[package.extras]
-diagrams = ["pygraphviz"]
-test = ["pytest"]
-
-[[package]]
 name = "typed-ast"
 version = "1.4.3"
 description = "a fork of Python 2 and 3 ast modules with type comment support"
@@ -994,7 +979,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "8c375b321402e5d1557f75f6b63693bd1297fbb0a10bb0fa7de826ebbbb21d33"
+content-hash = "7534af9f1e153a8f73677a9f4ea37d53a81f5e943cba45ba68d285abee58e905"
 
 [metadata.files]
 altgraph = [
@@ -1567,10 +1552,6 @@ tornado = [
 tqdm = [
     {file = "tqdm-4.60.0-py2.py3-none-any.whl", hash = "sha256:daec693491c52e9498632dfbe9ccfc4882a557f5fa08982db1b4d3adbe0887c3"},
     {file = "tqdm-4.60.0.tar.gz", hash = "sha256:ebdebdb95e3477ceea267decfc0784859aa3df3e27e22d23b83e9b272bf157ae"},
-]
-transitions = [
-    {file = "transitions-0.8.8-py2.py3-none-any.whl", hash = "sha256:f35efa070fbdf9a0f3f093b19f1258068786af75786a8cbcc884444f3d1a66d4"},
-    {file = "transitions-0.8.8.tar.gz", hash = "sha256:e7a86b31a161a76133f189b3ae9dad2755a80ea4c1e0eee1805648d021fb677d"},
 ]
 typed-ast = [
     {file = "typed_ast-1.4.3-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:2068531575a125b87a41802130fa7e29f26c09a2833fea68d9a40cf33902eba6"},

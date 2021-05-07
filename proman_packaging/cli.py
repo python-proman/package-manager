@@ -3,34 +3,50 @@
 # license: Apache 2.0, see LICENSE for more details.
 '''Arguments for inspection based CLI parser.'''
 
-import atexit
+# import atexit
 import json
 import logging
 import os
+import site
 from typing import Optional
 from urllib.parse import urljoin
 
 from distlib.locators import PyPIJSONLocator
 
-from . import config as cfg, distributions
+from . import config as cfg
 from .config import Config
-from .distributions import LocalDistributionPath
+from .distributions import LocalDistributionPath, show_package_metadata
 from .package_manager import PackageManager
 from .source_tree import LockManager, SourceTreeManager
 
 logger = logging.getLogger(__name__)
 
+# Load configuration files
 source_tree_cfg = Config(filepath=cfg.pyproject_path, writable=True)
 lock_cfg = Config(filepath=cfg.lock_path, writable=True)
+
+# Load source trees
 source_tree_mgr = SourceTreeManager(source_tree_cfg)
 lock_mgr = LockManager(lock_cfg)
 
-local_distribution = LocalDistributionPath()
-local_distribution.load_path()
-atexit.register(local_distribution.remove_path)
+print(site.ENABLE_USER_SITE)
+print(site.USER_SITE)
+print(site.USER_BASE)
+print(site.getusersitepackages())
 
+# Setup distribution paths
+local_distribution = LocalDistributionPath()
+local_distribution.create_pypackages_pth()
+# local_distribution.load_pypackages()
+
+# TODO: is ephemeral pkgutil or site load with cleanup on exit
+# atexit.register(local_distribution.remove_path)
+
+# TODO setup proxy capability
+# setup repository
 locator = PyPIJSONLocator(urljoin(cfg.INDEX_URL, 'pypi'))
 
+# Setup package manager
 package_manager = PackageManager(
     source_tree=source_tree_mgr,
     lock=lock_mgr,
@@ -146,10 +162,10 @@ def list(versions: bool = True) -> None:
         print('\n'.join(local_distribution.package_names))
 
 
-# def show(name: str) -> None:
-#     '''Show information about installed packages.'''
-#     for key, val in distributions.show_package_metadata(name).items():
-#         print("{k} {v}".format(k=key, v=val))
+def show(name: str) -> None:
+    '''Show information about installed packages.'''
+    for key, val in show_package_metadata(name).items():
+        print("{k} {v}".format(k=key, v=val))
 
 
 # def check() -> None:
@@ -159,7 +175,7 @@ def list(versions: bool = True) -> None:
 
 def config() -> None:
     '''Manage distributions and global configuration.'''
-    print(distributions.get_site_packages_paths())
+    ...
 
 
 def search(

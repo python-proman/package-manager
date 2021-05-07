@@ -1,8 +1,6 @@
 # type: ignore
 import json
 
-from semantic_version import Version
-
 config = {'tool': {}}
 # table = tomlkit.table()
 config['tool'].update(
@@ -55,19 +53,19 @@ def test_remove():
     print(json.dumps(config, indent=2, sort_keys=True))
 
 
-def test_upgrade():
-    '''Upgrade package test'''
-    update = {'package': 'test2', 'version': '4.0.0'}
-    package = [p for p in config['tool']['dependencies']][0]
-
-    if Version(update['version']) > Version(package['version']):
-        print('This is our version: ' + update['version'])
-        config['tool']['dependencies'] = [
-            x
-            for x in config['tool']['dependencies']
-            if not (x.get('package') == update['package'])
-        ]
-        config['tool']['dependencies'].append(update)
-    else:
-        print('Not updated')
-    print(json.dumps(config, indent=2, sort_keys=True))
+# def test_upgrade():
+#     '''Upgrade package test'''
+#     update = {'package': 'test2', 'version': '4.0.0'}
+#     package = [p for p in config['tool']['dependencies']][0]
+#
+#     if Version(update['version']) > Version(package['version']):
+#         print('This is our version: ' + update['version'])
+#         config['tool']['dependencies'] = [
+#             x
+#             for x in config['tool']['dependencies']
+#             if not (x.get('package') == update['package'])
+#         ]
+#         config['tool']['dependencies'].append(update)
+#     else:
+#         print('Not updated')
+#     print(json.dumps(config, indent=2, sort_keys=True))
