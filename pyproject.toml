@@ -36,7 +36,7 @@ module = "proman_packaging"
 author = "Jesse P. Johnson"
 author-email = "jpj6652@gmail.com"
 home-page = "https://github.com/python-proman/proman-packaging"
-requires = []
+requires = ["argufy", "compendium", "distlib", "urllib3"]
 
 classifiers = ["License :: OSI Approved :: Apache Software License"]
 
