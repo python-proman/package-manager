@@ -6,7 +6,7 @@ import logging
 
 __author__ = 'Jesse P. Johnson'
 __title__ = 'proman-packaging'
-__version__ = '0.1.1-dev0'
+__version__ = '0.1.1-dev1'
 __license__ = 'Apache-2.0'
 __all__: List[str] = []
 
