@@ -15,7 +15,7 @@ from distlib.locators import PyPIJSONLocator
 
 from . import config as cfg
 from .config import Config
-from .distributions import LocalDistributionPath, show_package_metadata
+from .distributions import LocalDistributionPath, UserDistributionPath
 from .package_manager import PackageManager
 from .source_tree import LockManager, SourceTreeManager
 
@@ -29,10 +29,8 @@ lock_cfg = Config(filepath=cfg.lock_path, writable=True)
 source_tree_mgr = SourceTreeManager(source_tree_cfg)
 lock_mgr = LockManager(lock_cfg)
 
-print(site.ENABLE_USER_SITE)
-print(site.USER_SITE)
-print(site.USER_BASE)
-print(site.getusersitepackages())
+if site.ENABLE_USER_SITE:
+    user_distribution = UserDistributionPath()
 
 # Setup distribution paths
 local_distribution = LocalDistributionPath()
@@ -160,17 +158,6 @@ def list(versions: bool = True) -> None:
             print(k.name.ljust(25), k.version.ljust(15))
     else:
         print('\n'.join(local_distribution.package_names))
-
-
-def show(name: str) -> None:
-    '''Show information about installed packages.'''
-    for key, val in show_package_metadata(name).items():
-        print("{k} {v}".format(k=key, v=val))
-
-
-# def check() -> None:
-#     '''Verify installed packages have compatible dependencies.'''
-#     pass
 
 
 def config() -> None:

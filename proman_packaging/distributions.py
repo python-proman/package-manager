@@ -55,15 +55,6 @@ class SystemDistributionPath(DistributionPathMixin):
         **kwargs: Any,
     ) -> None:
         '''Initialize local distribution.'''
-        self.project_name = kwargs.pop('name', os.path.basename(os.getcwd()))
-        self.pypackages_dir = kwargs.pop(
-            'pypackages_dir', config.pypackages_dir
-        )
-        self.env_version = (
-            f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}"
-        )
-        self.__dist_dir = os.path.join(self.pypackages_dir, self.env_version)
-
         DistributionPath.__init__(self, paths, include_egg)
 
 
@@ -77,14 +68,8 @@ class UserDistributionPath(DistributionPathMixin):
         **kwargs: Any,
     ) -> None:
         '''Initialize local distribution.'''
-        self.project_name = kwargs.pop('name', os.path.basename(os.getcwd()))
-        self.pypackages_dir = kwargs.pop(
-            'pypackages_dir', config.pypackages_dir
-        )
-        self.env_version = (
-            f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}"
-        )
-        self.__dist_dir = os.path.join(self.pypackages_dir, self.env_version)
+        if site.USER_SITE:
+            paths += [site.USER_SITE]
 
         DistributionPath.__init__(self, paths, include_egg)
 

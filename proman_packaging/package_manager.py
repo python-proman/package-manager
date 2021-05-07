@@ -20,7 +20,6 @@ from distlib.database import (
 from distlib import DistlibException
 from distlib.index import PackageIndex
 from distlib.locators import locate, Locator
-from distlib.resources import finder
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 import urllib3
@@ -308,9 +307,9 @@ class PackageManager(PyPIRepositoryMixin):
         self.distribution_path.create_pypackages()
 
         if sequence:
-            package = locate(sequence)
             # TODO: json/rpc does not include run_requires
             # package = self.locator.locate(sequence)
+            package = locate(sequence)
 
             self.__source_tree.add_dependency(package, dev)
             dependencies = [package] + self.get_dependencies(package)
@@ -400,9 +399,9 @@ class PackageManager(PyPIRepositoryMixin):
         # TODO: compare removed dependencies with remaining
 
         if sequence:
-            package = locate(sequence)
             # TODO: json/rpc does not include run_requires
             # package = self.locator.locate(sequence)
+            package = locate(sequence)
 
             if package and self.__source_tree.is_dependency(package.name, dev):
                 self.__source_tree.remove_dependency(package.name, dev)

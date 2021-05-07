@@ -139,7 +139,6 @@ class LockManager(ProjectSettingsMixin):
                 'version': package.version,
                 'digests': [':'.join(v) for k, v in package.digests.items()]
             }
-            print('lock', lock)
             self.__settings.append(f"/{self.dependency_type(dev)}", lock)
         else:
             print('package lock already exists')
