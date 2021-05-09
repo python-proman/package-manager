@@ -107,19 +107,23 @@ class LocalDistributionPath(DistributionPathMixin):
             f.write('\n')
             f.write(os.path.join(self.env_version, 'lib64'))
 
-    def create_pypackages_pth(self) -> None:
+    def create_pypackages_pth(
+        self, site_dir: Optional[str] = site.USER_SITE
+    ) -> None:
         '''Create pth file for pypackages.'''
         if not os.path.exists(self.pypackages_dir):
             os.makedirs(self.pypackages_dir)
 
-        for site_packages_dir in site.getsitepackages():
+        # XXX: need to determin best way to link pypackages
+        # for site_packages_dir in site.getsitepackages():
+        if site_dir:
             if (
-                os.path.exists(site_packages_dir)
-                and os.path.isdir(site_packages_dir)
+                os.path.exists(site_dir)
+                and os.path.isdir(site_dir)
             ):
                 with open(
                     os.path.join(
-                        site_packages_dir, f"proman-{self.project_name}.pth"
+                        site_dir, f"proman-{self.project_name}.pth"
                     ), 'w'
                 ) as f:
                     f.write(self.pypackages_dir)
