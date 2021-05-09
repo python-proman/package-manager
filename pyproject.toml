@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "proman-packaging"
-version = "0.1.1-dev1"
+version = "0.1.1-dev2"
 description = "Simple package manager for Python."
 authors = ["Jesse P. Johnson <jpj6652@gmail.com>"]
 
