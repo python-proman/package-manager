@@ -51,7 +51,7 @@ class SystemDistributionPath(DistributionPathMixin):
     def __init__(
         self,
         paths: List[str] = [],
-        include_egg: bool = True,
+        include_egg: bool = False,
         **kwargs: Any,
     ) -> None:
         '''Initialize local distribution.'''
@@ -115,7 +115,7 @@ class LocalDistributionPath(DistributionPathMixin):
             os.makedirs(self.pypackages_dir)
 
         # XXX: need to determin best way to link pypackages
-        # for site_packages_dir in site.getsitepackages():
+        # for site_packages_dir in site.getusersitepackages():
         if site_dir:
             if (
                 os.path.exists(site_dir)
@@ -136,11 +136,11 @@ class LocalDistributionPath(DistributionPathMixin):
             os.makedirs(self.__dist_dir)
         self.paths = {
             'prefix': self.__dist_dir,
-            'purelib': f"{self.__dist_dir}/lib",
-            'platlib': f"{self.__dist_dir}/lib64",
-            'scripts': f"{self.__dist_dir}/bin",
-            'headers': f"{self.__dist_dir}/src",
-            'data': f"{self.__dist_dir}/share",
+            'purelib': os.path.join(self.__dist_dir, 'lib'),
+            'platlib': os.path.join(self.__dist_dir, 'lib64'),
+            'scripts': os.path.join(self.__dist_dir, 'bin'),
+            'headers': os.path.join(self.__dist_dir, 'src'),
+            'data': os.path.join(self.__dist_dir, 'share'),
         }
         for k, v in self.paths.items():
             if k != 'prefix':

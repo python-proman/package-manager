@@ -3,8 +3,8 @@ import os
 
 from distlib.locators import locate
 
-from proman_packaging.config import Config
-from proman_packaging.source_tree import LockManager
+from proman_dependencies.config import Config
+from proman_dependencies.manifest import LockFile
 
 lock_file = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'proman-lock.json'
@@ -19,14 +19,14 @@ update = locate('urllib3==1.25.0')
 
 def test_no_lock(fs):
     fs.add_real_file(lock_file, False)
-    lockfile = LockManager(lock_config)
+    lockfile = LockFile(lock_config)
     dep = lockfile.get_lock(package)
     assert dep == {}
 
 
 def test_add_lock(fs):
     fs.add_real_file(lock_file, False)
-    lockfile = LockManager(lock_config)
+    lockfile = LockFile(lock_config)
     lockfile.add_lock(package)
     dep = lockfile.get_lock(package.name)
     assert package.name == dep['name']
@@ -34,7 +34,7 @@ def test_add_lock(fs):
 
 def test_remove_lock(fs):
     fs.add_real_file(lock_file, False)
-    lockfile = LockManager(lock_config)
+    lockfile = LockFile(lock_config)
     lockfile.add_lock(package)
     lockfile.remove_lock(package)
     dep = lockfile.get_lock(package)
@@ -43,7 +43,7 @@ def test_remove_lock(fs):
 
 def test_update_lock(fs):
     fs.add_real_file(lock_file, False)
-    lockfile = LockManager(lock_config)
+    lockfile = LockFile(lock_config)
     lockfile.add_lock(package)
     dep = lockfile.get_lock(package.name)
     assert dep['name'] == package.name

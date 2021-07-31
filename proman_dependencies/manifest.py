@@ -20,7 +20,7 @@ class ProjectSettingsMixin:
         return 'dev-dependencies' if dev else 'dependencies'
 
 
-class SourceTreeManager(ProjectSettingsMixin):
+class SourceTreeFile(ProjectSettingsMixin):
     '''Manage source tree configuration file for project.
 
     see PEP-0517
@@ -88,7 +88,7 @@ class SourceTreeManager(ProjectSettingsMixin):
         self.__settings.dump(writable=True)
 
 
-class LockManager(ProjectSettingsMixin):
+class LockFile(ProjectSettingsMixin):
     '''Manage project lock configuration file.'''
 
     def __init__(self, lock_config: Config):
@@ -132,7 +132,9 @@ class LockManager(ProjectSettingsMixin):
     ) -> None:
         '''Add package lock to configuration.'''
         if not self.is_locked(package.name, dev):
-            # package_hashes = self.lookup_hashes(package.name, package.version)
+            # package_hashes = self.lookup_hashes(
+            #     package.name, package.version
+            # )
             print('package', package.__dict__)
             lock = {
                 'name': package.name,

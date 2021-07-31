@@ -26,7 +26,7 @@ import urllib3
 
 from . import config
 # from .config import Config
-from .source_tree import LockManager, SourceTreeManager
+from .manifest import LockFile, SourceTreeFile
 
 http = urllib3.PoolManager()
 logger = logging.getLogger(__name__)
@@ -127,8 +127,8 @@ class PackageManager(PyPIRepositoryMixin):
 
     def __init__(
         self,
-        source_tree: SourceTreeManager,
-        lock: LockManager,
+        source_tree: SourceTreeFile,
+        lock: LockFile,
         distribution: DistributionPath,
         locator: Locator,
         force: bool = False,

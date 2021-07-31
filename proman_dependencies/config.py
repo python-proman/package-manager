@@ -6,12 +6,13 @@
 import os
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import urljoin
 
-from compendium.config_manager import ConfigFile
+from compendium.loader import ConfigFile
 
 # from . import exception
 
-INDEX_URL = 'https://pypi.org/'
+INDEX_URL = 'https://pypi.org'
 VENV_PATH = os.getenv('VIRTUAL_ENV', None)
 PATHS = [VENV_PATH] if VENV_PATH else []
 
@@ -23,16 +24,11 @@ pypackages_dir = os.path.join(base_dir, '__pypackages__')
 
 
 @dataclass
-class PyPIConfigFile:
-    pass
-
-
-@dataclass
 class Config(ConfigFile):
     '''Manage settings from configuration file.'''
 
     filepath: str
-    index_url: str = f"{INDEX_URL}simple"
+    index_url: str = urljoin(INDEX_URL, 'simple')
     python_versions: tuple = ()
     digest_algorithm: str = 'sha256'
     include_prereleases: bool = False

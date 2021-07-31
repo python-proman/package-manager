@@ -6,76 +6,39 @@
 # import atexit
 import json
 import logging
-import os
-import site
+import sys
 from typing import Optional
-from urllib.parse import urljoin
 
-from distlib.locators import PyPIJSONLocator
-
-from . import config as cfg
-from .config import Config
-from .distributions import LocalDistributionPath, UserDistributionPath
-from .package_manager import PackageManager
-from .source_tree import LockManager, SourceTreeManager
+from ._startup import local_distribution, package_manager
 
 logger = logging.getLogger(__name__)
 
-# Load configuration files
-source_tree_cfg = Config(filepath=cfg.pyproject_path, writable=True)
-lock_cfg = Config(filepath=cfg.lock_path, writable=True)
 
-# Load source trees
-source_tree_mgr = SourceTreeManager(source_tree_cfg)
-lock_mgr = LockManager(lock_cfg)
-
-if site.ENABLE_USER_SITE:
-    user_distribution = UserDistributionPath()
-
-# Setup distribution paths
-local_distribution = LocalDistributionPath()
-local_distribution.create_pypackages_pth()
-# local_distribution.load_pypackages()
-
-# TODO: is ephemeral pkgutil or site load with cleanup on exit
-# atexit.register(local_distribution.remove_path)
-
-# TODO setup proxy capability
-# setup repository
-locator = PyPIJSONLocator(urljoin(cfg.INDEX_URL, 'pypi'))
-
-# Setup package manager
-package_manager = PackageManager(
-    source_tree=source_tree_mgr,
-    lock=lock_mgr,
-    distribution=local_distribution,
-    locator=locator,
-    force=False,
-    update=False,
-    options={}
-)
+def config() -> None:
+    '''Manage distributions and global configuration.'''
+    pass
 
 
-def init(name: str) -> None:
-    '''Initialize a new project.'''
-    if not os.path.isfile(source_tree_cfg.filepath):
-        source_tree_cfg['tool'] = {
-            'proman': {
-                'authors': ['Jesse P. Johnson'],
-                'name': name,
-                'description': 'Description for the project',
-                'version': '0.1.0',
-                'dependencies': {},
-                'dev-dependencies': {}
-            }
-            # 'build-system': {
-            #     'requires': ["build"],
-            #     'build-backend': 'build.api:main'
-            # }
-        }
-        source_tree_cfg.dump(writable=True)
-    else:
-        print('project is already initialized')
+# def init(name: str) -> None:
+#     '''Initialize a new project.'''
+#     if source_tree_cfg and not os.path.isfile(source_tree_cfg.filepath):
+#         source_tree_cfg['tool'] = {
+#             'proman': {
+#                 'authors': ['Jesse P. Johnson'],
+#                 'name': name,
+#                 'description': 'Description for the project',
+#                 'version': '0.1.0',
+#                 'dependencies': {},
+#                 'dev-dependencies': {}
+#             }
+#             # 'build-system': {
+#             #     'requires': ["build"],
+#             #     'build-backend': 'build.api:main'
+#             # }
+#         }
+#         source_tree_cfg.dump(writable=True)
+#     else:
+#         print('project is already initialized')
 
 
 def info(name: str, output: str = None) -> None:
@@ -116,7 +79,7 @@ def install(
 
     '''
     if name and name.startswith('-'):
-        print('error: not a valid install argument')
+        print('error: not a valid install argument', file=sys.stderr)
     else:
         package_manager.install(
             name, dev, python, platform, optional, prerelease
@@ -126,7 +89,7 @@ def install(
 def uninstall(name: Optional[str]) -> None:
     '''Uninstall packages.'''
     if name and name.startswith('-'):
-        print('error: not a valid install argument')
+        print('error: not a valid install argument', file=sys.stderr)
     else:
         package_manager.uninstall(name)
 
@@ -146,7 +109,7 @@ def upgrade(
 
     '''
     if name and name.startswith('-'):
-        print('error: not a valid install argument')
+        print('error: not a valid install argument', file=sys.stderr)
     else:
         package_manager.upgrade(name, force)
 
@@ -155,14 +118,9 @@ def list(versions: bool = True) -> None:
     '''List installed packages.'''
     if versions:
         for k in local_distribution.packages:
-            print(k.name.ljust(25), k.version.ljust(15))
+            print(k.name.ljust(25), k.version.ljust(15), file=sys.stdout)
     else:
-        print('\n'.join(local_distribution.package_names))
-
-
-def config() -> None:
-    '''Manage distributions and global configuration.'''
-    ...
+        print('\n'.join(local_distribution.package_names), file=sys.stdout)
 
 
 def search(
@@ -210,9 +168,10 @@ def search(
     )
     for package in packages:
         print(
-            package['name'].ljust(25),  # type: ignore
-            package['version'].ljust(15),  # type: ignore
-            package['summary'],  # type: ignore
+            package['name'].ljust(25),
+            package['version'].ljust(15),
+            package['summary'],
+            file=sys.stdout
         )
 
 
