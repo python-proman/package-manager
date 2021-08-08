@@ -11,8 +11,6 @@ lock_file = os.path.join(
 )
 lock_config = Config(filepath=lock_file, writable=True)
 
-pyproject_file = os.path.join(os.path.dirname(__file__), 'pyproject.toml')
-pyproject_config = Config(filepath=pyproject_file, writable=True)
 package = locate('urllib3==1.20.0')
 update = locate('urllib3==1.25.0')
 

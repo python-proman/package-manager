@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # copyright: (c) 2020 by Jesse Johnson.
-# license: Apache 2.0, see LICENSE for more details.
+# license: MPL-2.0, see LICENSE for more details.
 '''Interact with package repository to manage packages.'''
 
 # import io
@@ -11,7 +11,7 @@ import re
 import shutil
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from tempfile import TemporaryDirectory
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 from urllib.parse import urljoin
 
 from distlib.database import (
@@ -22,11 +22,14 @@ from distlib.index import PackageIndex
 from distlib.locators import locate, Locator
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
+# from proman_common.bases import PackageManagerBase
 import urllib3
 
 from . import config
 # from .config import Config
-from .manifest import LockFile, SourceTreeFile
+
+if TYPE_CHECKING:
+    from .manifest import LockFile, SourceTreeFile
 
 http = urllib3.PoolManager()
 logger = logging.getLogger(__name__)
@@ -122,13 +125,13 @@ class PyPIRepositoryMixin:
         )
 
 
-class PackageManager(PyPIRepositoryMixin):
+class PackageManager(PyPIRepositoryMixin):  # PackageManagerBase):
     '''Perform package managment tasks for a project.'''
 
     def __init__(
         self,
-        source_tree: SourceTreeFile,
-        lock: LockFile,
+        source_tree: 'SourceTreeFile',
+        lock: 'LockFile',
         distribution: DistributionPath,
         locator: Locator,
         force: bool = False,

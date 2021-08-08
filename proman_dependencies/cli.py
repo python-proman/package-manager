@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # copyright: (c) 2020 by Jesse Johnson.
-# license: Apache 2.0, see LICENSE for more details.
+# license: MPL-2.0, see LICENSE for more details.
 '''Arguments for inspection based CLI parser.'''
 
 # import atexit
@@ -9,7 +9,7 @@ import logging
 import sys
 from typing import Optional
 
-from ._startup import local_distribution, package_manager
+from . import local_distribution, package_manager
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ def install(
 
 
 def uninstall(name: Optional[str]) -> None:
-    '''Uninstall packages.'''
+    '''Uninstall package and dependencies.'''
     if name and name.startswith('-'):
         print('error: not a valid install argument', file=sys.stderr)
     else:
@@ -98,7 +98,7 @@ def upgrade(
     name: Optional[str],
     force: bool = False,
 ) -> None:
-    '''Install package and dependencies.
+    '''Update package and dependencies.
 
     Parameters
     ----------
@@ -132,7 +132,7 @@ def search(
     maintainer: Optional[str] = None,
     maintainer_email: Optional[str] = None,
     home_page: Optional[str] = None,
-    license: Optional[str] = None,
+    terms: Optional[str] = None,
     summary: Optional[str] = None,
     description: Optional[str] = None,
     keywords: Optional[str] = None,
@@ -154,7 +154,7 @@ def search(
             'maintainer': maintainer,
             'maintainer_email': maintainer_email,
             'home_page': home_page,
-            'license': license,
+            'license': terms,
             'summary': summary,
             'description': description,
             'keywords': keywords,
