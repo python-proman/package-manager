@@ -2,18 +2,18 @@
 import os
 import sys
 
-from dependencies.distributions import LocalDistributionPath
+from proman.dependencies.distributions import LocalDistributionPath
 
-package = 'urllib3'
+package = "urllib3"
 
 
 def test_packages():
     # paths, include_egg
     path = os.path.join(
         os.path.dirname(__file__),
-        '__pypackages__',
+        "__pypackages__",
         f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}",
-        'lib'
+        "lib",
     )
     local_dist = LocalDistributionPath([path])
     assert local_dist.packages[0].name == package
@@ -22,6 +22,7 @@ def test_packages():
     dist = local_dist.get_distribution(package)
 
     from distlib.locators import DistPathLocator
+
     dist_path = DistPathLocator(local_dist)
     print(dist_path._get_project(package))
     for x in dist.list_installed_files():

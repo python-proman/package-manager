@@ -11,8 +11,8 @@ from typing import List, Optional
 from urllib.parse import urljoin
 
 from distlib.locators import PyPIJSONLocator
-from proman_common.config import Config
-from proman_common.manifest import LockFile, SpecFile, Manifest
+from proman.common.config import Config
+from proman.common.manifest import LockFile, SpecFile, Manifest
 
 from . import config
 from .distributions import LocalDistributionPath, UserDistributionPath

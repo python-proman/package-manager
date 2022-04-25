@@ -3,8 +3,8 @@ import os
 
 from distlib.locators import locate
 
-from proman_dependencies.config import Config
-from proman_dependencies.manifest import SourceTreeFile
+from proman.dependencies.config import Config
+from proman.dependencies.manifest import SourceTreeFile
 
 pyproject_file = os.path.join(os.path.dirname(__file__), 'pyproject.toml')
 pyproject_config = Config(filepath=pyproject_file, writable=True)

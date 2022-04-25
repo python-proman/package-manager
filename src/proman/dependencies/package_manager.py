@@ -20,7 +20,7 @@ from distlib.locators import locate, Locator
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 from packaging.specifiers import SpecifierSet
-from proman_common.packaging_bases import PackageManagerBase
+from proman.common.packaging_bases import PackageManagerBase
 import urllib3
 
 from . import config
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         EggInfoDistribution,
         InstalledDistribution
     )
-    from proman_common.manifest import Manifest
+    from proman.common.manifest import Manifest
 
 log = logging.getLogger(__name__)
 http = urllib3.PoolManager(maxsize=16)

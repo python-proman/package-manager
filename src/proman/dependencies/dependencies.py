@@ -13,7 +13,7 @@ from distlib.locators import locate
 # from distlib.scripts import ScriptMaker
 # from distlib.wheel import Wheel
 # from packaging.specifiers import SpecifierSet
-from proman_common.dependencies import DependencyBase
+from proman.common.dependencies import DependencyBase
 
 # from . import config
 

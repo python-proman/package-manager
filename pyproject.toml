@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
 ]
 packages = [
-    {include = "dependencies", from = "src"},
+    {include = "proman", from = "src"},
 ]
 
 [tool.poetry.dependencies]
@@ -52,14 +52,14 @@ proman-versioning = "^0.5.0-alpha.2"
 pytest = "^6"
 
 [tool.poetry.scripts]
-pkg = "dependencies.__main__:main"
+pkg = "proman.dependencies.__main__:main"
 
 [[tool.proman.versioning.files]]
 filepath = "pyproject.toml"
 pattern = "version = \"${version}\""
 
 [[tool.proman.versioning.files]]
-filepath = "src/dependencies/__init__.py"
+filepath = "src/proman/dependencies/__init__.py"
 pattern = "__version__ = '${version}'"
 
 [[tool.proman.versioning.files]]

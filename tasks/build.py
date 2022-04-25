@@ -8,7 +8,7 @@ from typing import Optional, TYPE_CHECKING
 
 from invoke import call, task
 
-from proman_dependencies import __version__
+from proman.dependencies import __version__
 
 if TYPE_CHECKING:
     from invoke import Context
@@ -66,7 +66,7 @@ def clean(ctx):  # type: (Context) -> None
     paths = ['dist', 'logs']
     paths.append('**/__pycache__')
     paths.append('**/*.pyc')
-    paths.append('proman_dependencies.egg-info')
+    paths.append('proman.dependencies.egg-info')
     for path in paths:
         ctx.run(f"rm -rf {path}")
 

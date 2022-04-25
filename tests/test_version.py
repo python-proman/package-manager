@@ -1,4 +1,4 @@
-from dependencies import __version__
+from proman.dependencies import __version__
 
 
 def test_version() -> None:
