@@ -1,6 +1,5 @@
-# type: ignore
-from proman_dependencies import __version__
+from dependencies import __version__
 
 
-def test_version():
-    assert __version__ == "0.1.1-dev3"
+def test_version() -> None:
+    assert __version__ == '0.1.1-dev3'

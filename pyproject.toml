@@ -1,22 +1,37 @@
+[build-system]
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "proman-dependencies"
 version = "0.1.1-dev3"
 description = "Simple package manager for Python."
 authors = ["Jesse P. Johnson <jpj6652@gmail.com>"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+packages = [
+    {include = "dependencies", from = "src"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.6.2"
 urllib3 = {extras = ["certifi"], version = "^1.25.10"}
 distlib = "^0.3.1"
-argufy = "^0.1.2-dev.1"
-compendium = {extras = ["toml"], version = "^0.1.1-dev.68"}
 build = "^0.3.1"
 mypy-extensions = "^0.4.3"
 packaging = "^21.0"
-proman-common = {version = "^0.1.1-alpha.0", allow-prereleases = true}
+proman-common = {version = "^0.1.1-alpha.1", allow-prereleases = true}
+argufy = "^0.1.2-alpha.2"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
 flake8 = "^3.8.3"
 pydocstyle = "^5.0.2"
 docstr-coverage = "^1.2.0"
@@ -27,39 +42,45 @@ safety = "^1.9.0"
 mkdocs = "^1.2.2"
 mkdocs-material = "^7.2.0"
 mkdocstrings = "^0.15.2"
-bump2version = "^1.0.0"
 invoke = "^1.4.1"
 pyinstaller = "^4.0"
 cython = "^0.29.21"
 mypy = "^0.910"
-flit = "^3.2.0"
 pyfakefs = "^4.5.0"
 black = "^21.7b0"
+proman-versioning = "^0.5.0-alpha.2"
+pytest = "^6"
 
 [tool.poetry.scripts]
-pkg = "proman_dependencies.__main__:main"
+pkg = "dependencies.__main__:main"
 
-[tool.flit.metadata]
-module = "proman_dependencies"
-author = "Jesse P. Johnson"
-author-email = "jpj6652@gmail.com"
-home-page = "https://github.com/python-proman/proman-dependencies"
-requires = ["argufy", "compendium", "distlib", "mypy-extensions", "urllib3"]
+[[tool.proman.versioning.files]]
+filepath = "pyproject.toml"
+pattern = "version = \"${version}\""
 
-classifiers = ["License :: OSI Approved :: Apache Software License"]
+[[tool.proman.versioning.files]]
+filepath = "src/dependencies/__init__.py"
+pattern = "__version__ = '${version}'"
 
-[tool.flit.scripts]
-pkg = "proman_dependencies.__main__:main"
+[[tool.proman.versioning.files]]
+filepath = "tests/test_version.py"
+pattern = "__version__ == '${version}'"
 
-[build-system]
-requires = ["flit_core >=2,<4"]
-build-backend = "flit_core.buildapi"
+[tool.pydocstyle]
+ignore = [
+    "D203",
+    "D213",
+    "D300"
+]
 
 [tool.isort]
 profile = "black"
 line_length = 79
+multi_line_output = 3
 
 [tool.black]
+line-length = 79
+skip-string-normalization = true
 include = '\.pyi?$'
 exclude = '''
 

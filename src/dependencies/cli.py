@@ -3,15 +3,19 @@
 # license: MPL-2.0, see LICENSE for more details.
 '''Arguments for inspection based CLI parser.'''
 
-# import atexit
 import json
 import logging
 import sys
-from typing import Optional
+from typing import Any, Optional
 
-from . import local_distribution, package_manager
+from . import (
+    local_distribution as _local_distribution,
+    get_package_manager as _get_package_manager,
+)
 
-logger = logging.getLogger(__name__)
+log_level: Optional[str] = None
+_log = logging.getLogger(__name__)
+_package_manager = _get_package_manager()
 
 
 def config() -> None:
@@ -43,24 +47,17 @@ def config() -> None:
 
 def info(name: str, output: str = None) -> None:
     '''Get package info.'''
-    info = package_manager.get_package_info(name)
+    info = _package_manager.info(name)
     print(json.dumps(info, indent=2))
 
 
 def download(name: str, dest: str = '.') -> None:
     '''Download packages.'''
-    package_manager.download_package(name, dest)
+    _package_manager.download(name, dest)
 
 
-def install(
-    name: Optional[str],
-    dev: bool = False,
-    python: Optional[str] = None,
-    platform: Optional[str] = None,
-    optional: bool = False,
-    prerelease: bool = False,
-) -> None:
-    '''Install package and dependencies.
+def install(*packages: str, **options: Any) -> None:
+    '''Install package(s) and dependencies.
 
     Parameters
     ----------
@@ -78,27 +75,25 @@ def install(
         restrict package to specific platform
 
     '''
-    if name and name.startswith('-'):
-        print('error: not a valid install argument', file=sys.stderr)
-    else:
-        package_manager.install(
-            name, dev, python, platform, optional, prerelease
-        )
+    options['log_level'] = log_level
+    _package_manager.install(*packages, **options)
 
 
-def uninstall(name: Optional[str]) -> None:
-    '''Uninstall package and dependencies.'''
-    if name and name.startswith('-'):
-        print('error: not a valid install argument', file=sys.stderr)
-    else:
-        package_manager.uninstall(name)
+def uninstall(*packages: str, **options: Any) -> None:
+    '''Uninstall package(s) and dependencies.
+
+    Parameters
+    ----------
+    name: str
+        name of package(s) to be uninstalled
+
+    '''
+    options['log_level'] = log_level
+    _package_manager.uninstall(*packages, **options)
 
 
-def upgrade(
-    name: Optional[str],
-    force: bool = False,
-) -> None:
-    '''Update package and dependencies.
+def update(*packages: str, **options: Any) -> None:
+    '''Update package(s) and dependencies.
 
     Parameters
     ----------
@@ -108,19 +103,17 @@ def upgrade(
         force changes
 
     '''
-    if name and name.startswith('-'):
-        print('error: not a valid install argument', file=sys.stderr)
-    else:
-        package_manager.upgrade(name, force)
+    options['log_level'] = log_level
+    _package_manager.update(*packages, **options)
 
 
 def list(versions: bool = True) -> None:
     '''List installed packages.'''
     if versions:
-        for k in local_distribution.packages:
+        for k in _local_distribution.packages:
             print(k.name.ljust(25), k.version.ljust(15), file=sys.stdout)
     else:
-        print('\n'.join(local_distribution.package_names), file=sys.stdout)
+        print('\n'.join(_local_distribution.package_names), file=sys.stdout)
 
 
 def search(
@@ -144,7 +137,7 @@ def search(
     operation: Optional[str] = None,
 ) -> None:
     '''Search PyPI for packages.'''
-    packages = package_manager.search(
+    packages = _package_manager.search(
         query={
             'name': name,
             'version': version,
@@ -168,9 +161,9 @@ def search(
     )
     for package in packages:
         print(
-            package['name'].ljust(25),
-            package['version'].ljust(15),
-            package['summary'],
+            package['name'].ljust(25),  # type: ignore
+            package['version'].ljust(15),  # type: ignore
+            package['summary'],  # type: ignore
             file=sys.stdout
         )
 

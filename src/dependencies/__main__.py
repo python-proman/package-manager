@@ -10,7 +10,7 @@ from . import cli
 
 def main() -> None:
     '''Provide main function for CLI.'''
-    parser = Parser()
+    parser = Parser(use_module_args=True)
     parser.add_commands(cli)
     parser.dispatch()
 

@@ -2,7 +2,7 @@
 import os
 import sys
 
-from proman_dependencies.distributions import LocalDistributionPath
+from dependencies.distributions import LocalDistributionPath
 
 package = 'urllib3'
 
