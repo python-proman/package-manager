@@ -19,7 +19,7 @@ from .package_manager import PackageManager
 
 __author__ = 'Jesse P. Johnson'
 __title__ = 'proman-dependencies'
-__version__ = '0.1.1-dev3'
+__version__ = '0.1.1.dev4'
 __license__ = 'MPL-2.0'
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
