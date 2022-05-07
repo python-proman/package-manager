@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-# copyright: (c) 2020 by Jesse Johnson.
-# license: MPL-2.0, see LICENSE for more details.
-'''Manage local distributions.'''
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+"""Manage local distributions."""
 
 import logging
 import os
@@ -10,6 +9,7 @@ import sys
 from typing import Any, List, Optional
 
 from distlib.database import Distribution, DistributionPath
+
 # from distlib.index import PackageIndex
 # from distlib.locators import locate
 # from distlib.scripts import ScriptMaker
@@ -21,32 +21,32 @@ logger = logging.getLogger(__name__)
 
 
 class DistributionPathMixin(DistributionPath):
-    '''Provide distribution path tools.'''
+    """Provide distribution path tools."""
 
     @property
     def packages(self) -> List[Distribution]:
-        '''List installed packages.'''
+        """List installed packages."""
         return [x for x in self.get_distributions()]
 
     @property
     def package_names(self) -> List[str]:
-        '''Get packages names.'''
+        """Get packages names."""
         return [x.name for x in self.get_distributions()]
 
     def get_version(self, name: str) -> Optional[str]:
-        '''Get version of installed package.'''
+        """Get version of installed package."""
         return next(
             (v for k, v in self.packages if k == name),
             None,
         )
 
     def is_installed(self, name: str) -> bool:
-        '''Check is package is installed.'''
+        """Check is package is installed."""
         return False if self.get_distribution(name) is None else True
 
 
 class SystemDistributionPath(DistributionPathMixin):
-    '''Manage system distributions.'''
+    """Manage system distributions."""
 
     def __init__(
         self,
@@ -54,12 +54,12 @@ class SystemDistributionPath(DistributionPathMixin):
         include_egg: bool = False,
         **kwargs: Any,
     ) -> None:
-        '''Initialize local distribution.'''
+        """Initialize local distribution."""
         DistributionPath.__init__(self, paths, include_egg)
 
 
 class UserDistributionPath(DistributionPathMixin):
-    '''Manage global distributions.'''
+    """Manage global distributions."""
 
     def __init__(
         self,
@@ -67,7 +67,7 @@ class UserDistributionPath(DistributionPathMixin):
         include_egg: bool = False,
         **kwargs: Any,
     ) -> None:
-        '''Initialize local distribution.'''
+        """Initialize local distribution."""
         if site.USER_SITE:
             paths += [site.USER_SITE]
 
@@ -75,7 +75,7 @@ class UserDistributionPath(DistributionPathMixin):
 
 
 class LocalDistributionPath(DistributionPathMixin):
-    '''Manage local distributions.'''
+    """Manage local distributions."""
 
     def __init__(
         self,
@@ -83,7 +83,7 @@ class LocalDistributionPath(DistributionPathMixin):
         include_egg: bool = False,
         **kwargs: Any,
     ) -> None:
-        '''Initialize local distribution.'''
+        """Initialize local distribution."""
         self.project_name = kwargs.pop('name', os.path.basename(os.getcwd()))
         self.pypackages_dir = kwargs.pop(
             'pypackages_dir', config.pypackages_dir
@@ -96,12 +96,12 @@ class LocalDistributionPath(DistributionPathMixin):
         DistributionPath.__init__(self, paths, include_egg)
 
     def create_dist_pth(self) -> None:
-        '''Create pth file for distibution version.'''
+        """Create pth file for distibution version."""
         with open(
             os.path.join(
                 self.pypackages_dir, f"proman-{self.env_version}.pth"
             ),
-            'a+'
+            'a+',
         ) as f:
             f.write(os.path.join(self.env_version, 'lib'))
             f.write('\n')
@@ -110,28 +110,22 @@ class LocalDistributionPath(DistributionPathMixin):
     def create_pypackages_pth(
         self, site_dir: Optional[str] = site.USER_SITE
     ) -> None:
-        '''Create pth file for pypackages.'''
+        """Create pth file for pypackages."""
         if not os.path.exists(self.pypackages_dir):
             os.makedirs(self.pypackages_dir)
 
         # XXX: need to determin best way to link pypackages
         # for site_packages_dir in site.getusersitepackages():
         if site_dir:
-            if (
-                os.path.exists(site_dir)
-                and os.path.isdir(site_dir)
-            ):
+            if os.path.exists(site_dir) and os.path.isdir(site_dir):
                 with open(
-                    os.path.join(
-                        site_dir, f"proman-{self.project_name}.pth"
-                    ), 'w'
+                    os.path.join(site_dir, f"proman-{self.project_name}.pth"),
+                    'w',
                 ) as f:
                     f.write(self.pypackages_dir)
 
-    def create_pypackages(
-        self, base_dir: Optional[str] = None
-    ) -> None:
-        '''Create pypackages directory.'''
+    def create_pypackages(self, base_dir: Optional[str] = None) -> None:
+        """Create pypackages directory."""
         if not os.path.exists(self.__dist_dir):
             os.makedirs(self.__dist_dir)
         self.paths = {
@@ -148,6 +142,6 @@ class LocalDistributionPath(DistributionPathMixin):
         self.create_dist_pth()
 
     def load_pypackages(self, project_dir: str = os.getcwd()) -> None:
-        '''Load pypackages into paths.'''
+        """Load pypackages into paths."""
         site.addsitedir(self.pypackages_dir)
         site.addsitedir(project_dir)

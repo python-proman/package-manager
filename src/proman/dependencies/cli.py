@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-# copyright: (c) 2020 by Jesse Johnson.
-# license: MPL-2.0, see LICENSE for more details.
-'''Arguments for inspection based CLI parser.'''
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+"""Arguments for inspection based CLI parser."""
 
 import json
 import logging
@@ -19,12 +18,12 @@ _package_manager = _get_package_manager()
 
 
 def config() -> None:
-    '''Manage distributions and global configuration.'''
+    """Manage distributions and global configuration."""
     pass
 
 
 # def init(name: str) -> None:
-#     '''Initialize a new project.'''
+#     """Initialize a new project."""
 #     if source_tree_cfg and not os.path.isfile(source_tree_cfg.filepath):
 #         source_tree_cfg['tool'] = {
 #             'proman': {
@@ -46,18 +45,18 @@ def config() -> None:
 
 
 def info(name: str, output: str = None) -> None:
-    '''Get package info.'''
+    """Get package info."""
     info = _package_manager.info(name)
     print(json.dumps(info, indent=2))
 
 
 def download(name: str, dest: str = '.') -> None:
-    '''Download packages.'''
+    """Download packages."""
     _package_manager.download(name, dest)
 
 
 def install(*packages: str, **options: Any) -> None:
-    '''Install package(s) and dependencies.
+    """Install package(s) and dependencies.
 
     Parameters
     ----------
@@ -74,26 +73,26 @@ def install(*packages: str, **options: Any) -> None:
     platform: str
         restrict package to specific platform
 
-    '''
+    """
     options['log_level'] = log_level
     _package_manager.install(*packages, **options)
 
 
 def uninstall(*packages: str, **options: Any) -> None:
-    '''Uninstall package(s) and dependencies.
+    """Uninstall package(s) and dependencies.
 
     Parameters
     ----------
     name: str
         name of package(s) to be uninstalled
 
-    '''
+    """
     options['log_level'] = log_level
     _package_manager.uninstall(*packages, **options)
 
 
 def update(*packages: str, **options: Any) -> None:
-    '''Update package(s) and dependencies.
+    """Update package(s) and dependencies.
 
     Parameters
     ----------
@@ -102,13 +101,13 @@ def update(*packages: str, **options: Any) -> None:
     force: bool
         force changes
 
-    '''
+    """
     options['log_level'] = log_level
     _package_manager.update(*packages, **options)
 
 
 def list(versions: bool = True) -> None:
-    '''List installed packages.'''
+    """List installed packages."""
     if versions:
         for k in _local_distribution.packages:
             print(k.name.ljust(25), k.version.ljust(15), file=sys.stdout)
@@ -136,7 +135,7 @@ def search(
     docs_url: Optional[str] = None,
     operation: Optional[str] = None,
 ) -> None:
-    '''Search PyPI for packages.'''
+    """Search PyPI for packages."""
     packages = _package_manager.search(
         query={
             'name': name,
@@ -164,10 +163,10 @@ def search(
             package['name'].ljust(25),  # type: ignore
             package['version'].ljust(15),  # type: ignore
             package['summary'],  # type: ignore
-            file=sys.stdout
+            file=sys.stdout,
         )
 
 
 # def build() -> None:
-#     '''Build wheels from your requirements.'''
+#     """Build wheels from your requirements."""
 #     pass

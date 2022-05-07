@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# type: ignore
+
 import sys
 from spec import trap
 from invoke import MockContext, Result

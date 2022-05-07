@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-# copyright: (c) 2020 by Jesse Johnson.
-# license: MPL-2.0, see LICENSE for more details.
-'''Interact with package repository to manage packages.'''
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+"""Interact with package repository to manage packages."""
 
 # import io
 import json
@@ -16,7 +15,7 @@ from urllib.parse import urljoin
 from distlib import DistlibException
 from distlib.database import Distribution
 from distlib.index import PackageIndex
-from distlib.locators import locate, Locator
+from distlib.locators import Locator  # , locate
 from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 from packaging.specifiers import SpecifierSet
@@ -30,7 +29,7 @@ if TYPE_CHECKING:
     from distlib.database import (
         DistributionPath,
         EggInfoDistribution,
-        InstalledDistribution
+        InstalledDistribution,
     )
     from proman.common.manifest import Manifest
 
@@ -39,7 +38,7 @@ http = urllib3.PoolManager(maxsize=16)
 
 
 class PackageManager(PackageManagerBase):
-    '''Perform package managment tasks for a project.'''
+    """Perform package managment tasks for a project."""
 
     def __init__(
         self,
@@ -48,7 +47,7 @@ class PackageManager(PackageManagerBase):
         locator: Locator,
         **options: Any,
     ) -> None:
-        '''Initialize package manager configuration.'''
+        """Initialize package manager configuration."""
         self.__manifest = manifest
         self.__locator = locator
         self.distribution_path = distribution_path
@@ -68,7 +67,7 @@ class PackageManager(PackageManagerBase):
     # Repository
     @staticmethod
     def _lookup_package(name: str) -> Dict[str, Any]:
-        '''Get package metadata.'''
+        """Get package metadata."""
         # TODO: refactor to distlib
         url_path = urljoin(config.INDEX_URL, f"pypi/{name}/json")
         rsp = http.request('GET', url_path)
@@ -84,7 +83,7 @@ class PackageManager(PackageManagerBase):
         name: str,
         section: Optional[str] = None,
     ) -> Dict[str, Any]:
-        '''Get package information.'''
+        """Get package information."""
         # TODO: refactor to distlib
         rst = PackageManager._lookup_package(name)
         if section:
@@ -97,7 +96,7 @@ class PackageManager(PackageManagerBase):
         package: 'Distribution',
         package_type: str = 'bdist_wheel',
     ) -> Optional[Dict[str, Any]]:
-        '''Get release from index.'''
+        """Get release from index."""
         # TODO: refactor to distlib
         pkg_data = PackageManager._lookup_package(package.name)
         # from pprint import pprint
@@ -109,7 +108,7 @@ class PackageManager(PackageManagerBase):
                     for r in pkg_data['releases'][package.version]
                     if r['packagetype'] == package_type
                 ),
-                None
+                None,
             )
             return release
         else:
@@ -121,7 +120,7 @@ class PackageManager(PackageManagerBase):
         dest: str = '.',
         digests: List[str] = [],
     ) -> Optional[str]:
-        '''Execute package download.'''
+        """Execute package download."""
         if isinstance(package, Distribution):
             release = PackageManager.get_release(package)
         else:
@@ -132,10 +131,7 @@ class PackageManager(PackageManagerBase):
             filepath = os.path.join(dest, release['filename'])
             index = PackageIndex(url=urljoin(config.INDEX_URL, 'pypi'))
             index.download_file(
-                release['url'],
-                filepath,
-                digest=None,
-                reporthook=None
+                release['url'], filepath, digest=None, reporthook=None
             )
             return filepath
         else:
@@ -143,35 +139,32 @@ class PackageManager(PackageManagerBase):
 
     @staticmethod
     def search(query: Any, **options: Any) -> Dict[str, Any]:
-        '''Search PyPI for packages.'''
+        """Search PyPI for packages."""
         operation = options.get('operation', None)
         url = options.get('url', urljoin(config.INDEX_URL, 'pypi'))
         index = PackageIndex(url=url)
         return index.search(
-            {k: v for k, v in query.items() if v is not None},
-            operation
+            {k: v for k, v in query.items() if v is not None}, operation
         )
 
     @staticmethod
     def get_dependencies(package: 'Distribution') -> List['Distribution']:
-        '''Get package dependencies.'''
+        """Get package dependencies."""
         dependencies = []
         for sequence in package.run_requires:
             dependency = Dependency(sequence)
             dependencies.append(dependency)
-            sub_dependencies = (
-                PackageManager.get_dependencies(dependency)
-            )
+            sub_dependencies = PackageManager.get_dependencies(dependency)
             dependencies = dependencies + sub_dependencies
         return dependencies
 
     def get_digests(self, sequence: str) -> Dict[str, Any]:
-        '''Provide access to digests when not locally available.'''
+        """Provide access to digests when not locally available."""
         package = self.__locator.locate(sequence)
         return package.digests
 
     def save(self) -> None:
-        '''Save each configuration.'''
+        """Save each configuration."""
         if self.__manifest:
             self.__manifest.source_tree.save()
             self.__manifest.lockfile.save()
@@ -180,7 +173,7 @@ class PackageManager(PackageManagerBase):
     #     self,
     #     package: 'Distribution'
     # ) -> Optional['Distribution']:
-    #     '''Check installed package is installed.'''
+    #     """Check installed package is installed."""
     #     install = next(
     #         (
     #             x
@@ -193,9 +186,11 @@ class PackageManager(PackageManagerBase):
 
     # Install package
     def __install_wheel(
-        self, filepath: str, **options: Any,
+        self,
+        filepath: str,
+        **options: Any,
     ) -> 'InstalledDistribution':
-        '''Install wheel to selected paths.'''
+        """Install wheel to selected paths."""
         wheel = Wheel(filepath)
         try:
             wheel.verify()
@@ -208,28 +203,27 @@ class PackageManager(PackageManagerBase):
             log.error('wheel did not pass validation')
 
     def __install_sdist(
-        self, filepath: str, **options: Any,
+        self,
+        filepath: str,
+        **options: Any,
     ) -> 'EggInfoDistribution':
-        '''Install source distribution to selected paths.'''
+        """Install source distribution to selected paths."""
         log.warning('sdist is here')
         return None
 
     def _install_package(
         self, package: 'Distribution', **options: str
     ) -> Optional['Dependency']:
-        '''Perform package installation.'''
-        release = (
-            self.get_release(package)
-            or self.get_release(package, package_type='sdist')
+        """Perform package installation."""
+        release = self.get_release(package) or self.get_release(
+            package, package_type='sdist'
         )
         if release:
             # TODO: download all packages before install
             # print('---', release)
             digests = list(options.get('digests', []))
             filepath = self.download(
-                release,
-                options['temp_dir'],
-                digests=digests
+                release, options['temp_dir'], digests=digests
             )
             if filepath:
                 if release['packagetype'] == 'bdist_wheel':
@@ -253,7 +247,7 @@ class PackageManager(PackageManagerBase):
     def _perform_install(
         self, package: 'Distribution', **options: Any
     ) -> Optional['Dependency']:
-        '''Perform coordination of installation processes.'''
+        """Perform coordination of installation processes."""
         # check is package already installed
         installed = None
         if self.distribution_path.is_installed(package.name):
@@ -262,10 +256,7 @@ class PackageManager(PackageManagerBase):
 
         # check if package already locked
         locked = None
-        if (
-            self.__manifest
-            and self.__manifest.lockfile.is_locked(package)
-        ):
+        if self.__manifest and self.__manifest.lockfile.is_locked(package):
             locked = self.__manifest.lockfile.get_lock(package)
             log.info('package locked:', locked)
 
@@ -293,7 +284,7 @@ class PackageManager(PackageManagerBase):
         return installed
 
     def install(self, *packages: Any, **options: Any) -> None:
-        '''Install package and dependencies.'''
+        """Install package and dependencies."""
         dev = options.get('dev', False)
 
         # create distribution paths
@@ -307,12 +298,12 @@ class PackageManager(PackageManagerBase):
                 dependency = Dependency(package, **options)
                 log.debug(
                     'package specifier:',
-                    SpecifierSet(f">={dependency.version}")
+                    SpecifierSet(f">={dependency.version}"),
                 )
                 if self.__manifest:
                     self.__manifest.source_tree.add_dependency(dependency)
-                dependencies += (
-                    [dependency] + self.get_dependencies(dependency)
+                dependencies += [dependency] + self.get_dependencies(
+                    dependency
                 )
                 log.debug('installing dependencies:', dependencies)
         elif self.__manifest:
@@ -340,16 +331,14 @@ class PackageManager(PackageManagerBase):
                             #     result.key in [x.key for x in dependencies]
                             # )
                             installed = [
-                                x
-                                for x in dependencies
-                                if x.key == result.key
+                                x for x in dependencies if x.key == result.key
                             ][0]
                             print('installed', installed)
             self.save()
 
     # Uninstall package
     def __remove_package(self, package: 'Distribution') -> None:
-        '''Perform package uninstall tasks.'''
+        """Perform package uninstall tasks."""
         # paths to be removed
         paths = []
 
@@ -377,7 +366,7 @@ class PackageManager(PackageManagerBase):
     def _uninstall_package(
         self, package: 'Distribution', **options: Any
     ) -> Optional[Union['EggInfoDistribution', 'InstalledDistribution']]:
-        '''Perform coordination of installation processes.'''
+        """Perform coordination of installation processes."""
         installed = None
         if self.distribution_path.is_installed(package.name):
             installed = self.distribution_path.get_distribution(package.name)
@@ -387,10 +376,7 @@ class PackageManager(PackageManagerBase):
             log.info('could not uninstall non-existent package:', package.name)
 
         locked = None
-        if (
-            self.__manifest
-            and self.__manifest.lockfile.is_locked(package)
-        ):
+        if self.__manifest and self.__manifest.lockfile.is_locked(package):
             locked = self.__manifest.lockfile.get_lock(
                 package.name,
                 package.is_dev,
@@ -400,7 +386,7 @@ class PackageManager(PackageManagerBase):
         return installed
 
     def uninstall(self, *packages: Any, **options: Any) -> None:
-        '''Uninstall package and dependencies.'''
+        """Uninstall package and dependencies."""
         # TODO: compare removed dependencies with remaining
         dev = options.get('dev', False)
         if packages:
@@ -439,7 +425,7 @@ class PackageManager(PackageManagerBase):
 
     # Upgrade package
     def update(self, *packages: Any, **options: Any) -> None:
-        '''Upgrade/downgrade package and dependencies.'''
+        """Upgrade/downgrade package and dependencies."""
         # self.distribution_path.clear_cache()
         force = options.get('force', False)
         if packages:

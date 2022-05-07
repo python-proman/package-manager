@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
-# copyright: (c) 2020 by Jesse Johnson.
-# license: MPL-2.0, see LICENSE for more details.
-'''Provide configuration for package management.'''
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
+"""Provide configuration for package management."""
 
 import os
 # from . import exception

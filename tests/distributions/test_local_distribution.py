@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
 # type: ignore
 import os
 import sys
@@ -10,10 +12,7 @@ package = "urllib3"
 def test_packages():
     # paths, include_egg
     path = os.path.join(
-        os.path.dirname(__file__),
-        "__pypackages__",
-        f"{str(sys.version_info.major)}.{str(sys.version_info.minor)}",
-        "lib",
+        os.path.dirname(__file__), "__pypackages__", "3.8", "lib"
     )
     local_dist = LocalDistributionPath([path])
     assert local_dist.packages[0].name == package

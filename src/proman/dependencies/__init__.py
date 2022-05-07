@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
-# copyright: (c) 2020 by Jesse Johnson.
-# license: MPL-2.0, see LICENSE for more details.
+# SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
+# SPDX-License-Identifier: LGPL-3.0-or-later
 """Simple package manager for Python."""
 
 import logging
@@ -60,7 +59,7 @@ def get_package_manager() -> 'PackageManager':
             dependency_class={
                 'module': 'dependencies.dependencies',
                 'class': 'Dependency',
-            }
+            },
         )
     else:
         print(specfile, lockfile)
@@ -78,6 +77,4 @@ def get_package_manager() -> 'PackageManager':
     )
 
 
-__all__: List[str] = [
-    'local_distribution', 'package_manager', 'spec_cfg'
-]
+__all__: List[str] = ['local_distribution', 'package_manager', 'spec_cfg']
