@@ -25,20 +25,18 @@ def config() -> None:
 # def init(name: str) -> None:
 #     """Initialize a new project."""
 #     if source_tree_cfg and not os.path.isfile(source_tree_cfg.filepath):
-#         source_tree_cfg['tool'] = {
-#             'proman': {
-#                 'authors': ['Jesse P. Johnson'],
-#                 'name': name,
-#                 'description': 'Description for the project',
-#                 'version': '0.1.0',
-#                 'dependencies': {},
-#                 'dev-dependencies': {}
-#             }
-#             # 'build-system': {
-#             #     'requires': ["build"],
-#             #     'build-backend': 'build.api:main'
-#             # }
+#         source_tree_cfg['project'] = {
+#             'name': name,
+#             'description': 'Description for the project',
+#             'version': '0.1.0',
+#             'authors': ['Jesse P. Johnson'],
+#             'dependencies': {},
+#             'dev-dependencies': {}
 #         }
+#         # source_tree_cfg['build-system'] = {
+#         #     'requires': ["build"],
+#         #     'build-backend': 'build.api:main'
+#         # }
 #         source_tree_cfg.dump(writable=True)
 #     else:
 #         print('project is already initialized')

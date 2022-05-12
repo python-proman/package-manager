@@ -1,18 +1,19 @@
 # SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # type: ignore
+
 import os
 import sys
 
-from proman.dependencies.distributions import LocalDistributionPath
+from proman.package_manager.distributions import LocalDistributionPath
 
-package = "urllib3"
+package = 'urllib3'
 
 
 def test_packages():
     # paths, include_egg
     path = os.path.join(
-        os.path.dirname(__file__), "__pypackages__", "3.8", "lib"
+        os.path.dirname(__file__), '__pypackages__', '3.8', 'lib'
     )
     local_dist = LocalDistributionPath([path])
     assert local_dist.packages[0].name == package

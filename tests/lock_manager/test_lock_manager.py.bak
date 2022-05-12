@@ -1,12 +1,13 @@
 # SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # type: ignore
+
 import os
 
 from distlib.locators import locate
 
-from proman.dependencies.config import Config
-from proman.dependencies.manifest import LockFile
+from proman.package_manager.config import Config
+from proman.package_manager.manifest import LockFile
 
 lock_file = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'proman-lock.json'
