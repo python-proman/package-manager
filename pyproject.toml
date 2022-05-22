@@ -3,7 +3,7 @@ requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "proman-dependencies"
+name = "proman-package-manager"
 version = "0.1.1.dev4"
 description = "Simple package manager for Python."
 authors = ["Jesse P. Johnson <jpj6652@gmail.com>"]
@@ -50,14 +50,14 @@ pytest = "^6"
 build = "^0.7.0"
 
 [tool.poetry.scripts]
-pkg = "proman.dependencies.__main__:main"
+pkg = "proman.package_manager.__main__:main"
 
 [[tool.proman.versioning.files]]
 filepath = "pyproject.toml"
 pattern = "version = \"${version}\""
 
 [[tool.proman.versioning.files]]
-filepath = "src/proman/dependencies/__init__.py"
+filepath = "src/proman/package_manager/__init__.py"
 pattern = "__version__ = '${version}'"
 
 [[tool.proman.versioning.files]]

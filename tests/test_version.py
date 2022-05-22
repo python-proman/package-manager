@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
 # SPDX-License-Identifier: LGPL-3.0-or-later
 
-from proman.dependencies import __version__
+from proman.package_manager import __version__
 
 
 def test_version() -> None:

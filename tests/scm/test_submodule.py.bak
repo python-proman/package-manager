@@ -5,7 +5,7 @@
 import sys
 from spec import trap
 from invoke import MockContext, Result
-from proman.dependencies import submodule
+from proman.package_manager import submodule
 
 
 @trap

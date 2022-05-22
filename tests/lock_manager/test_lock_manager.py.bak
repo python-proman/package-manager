@@ -5,8 +5,8 @@ import os
 
 from distlib.locators import locate
 
-from proman.dependencies.config import Config
-from proman.dependencies.manifest import LockFile
+from proman.package_manager.config import Config
+from proman.package_manager.manifest import LockFile
 
 lock_file = os.path.join(
     os.path.dirname(os.path.realpath(__file__)), 'proman-lock.json'
