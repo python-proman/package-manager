@@ -3,30 +3,34 @@
 # type: ignore
 
 import os
-import sys
+
+# import sys
 
 from proman.package_manager.distributions import LocalDistributionPath
+
+from ..utils import TempDistributionPath
 
 package = 'urllib3'
 
 
 def test_packages():
     # paths, include_egg
-    path = os.path.join(
-        os.path.dirname(__file__), '__pypackages__', '3.8', 'lib'
-    )
-    local_dist = LocalDistributionPath([path])
-    assert local_dist.packages[0].name == package
-    assert local_dist.is_installed(package) is True
+    with TempDistributionPath(
+        os.path.join(os.path.dirname(__file__), 'pypackages.zip'),
+    ) as temp_path:
+        lib_path = os.path.join(temp_path, '3.8', 'lib')
+        local_dist = LocalDistributionPath([lib_path])
+        assert local_dist.packages[0].name == package
+        assert local_dist.is_installed(package) is True
 
-    dist = local_dist.get_distribution(package)
+        # from distlib.locators import DistPathLocator
 
-    from distlib.locators import DistPathLocator
+        # dist_path = DistPathLocator(local_dist)
+        # print(dist_path._get_project(package))
 
-    dist_path = DistPathLocator(local_dist)
-    print(dist_path._get_project(package))
-    for x in dist.list_installed_files():
-        print(x)
+        dist = local_dist.get_distribution(package)
+        for x in dist.list_installed_files():
+            print(x)
 
 
 # def test_remove_dependency():

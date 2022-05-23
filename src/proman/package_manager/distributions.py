@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: © 2020-2022 Jesse Johnson <jpj6652@gmail.com>
 # SPDX-License-Identifier: LGPL-3.0-or-later
-"""Manage local distributions."""
+"""Manage distribution paths."""
 
 import logging
 import os
@@ -97,15 +97,15 @@ class LocalDistributionPath(DistributionPathMixin):
 
     def create_dist_pth(self) -> None:
         """Create pth file for distibution version."""
-        with open(
-            os.path.join(
-                self.pypackages_dir, f"proman-{self.env_version}.pth"
-            ),
-            'a+',
-        ) as f:
-            f.write(os.path.join(self.env_version, 'lib'))
-            f.write('\n')
-            f.write(os.path.join(self.env_version, 'lib64'))
+        pth_file = os.path.join(
+            self.pypackages_dir, f"proman-{self.env_version}.pth"
+        )
+        if not os.path.exists(pth_file):
+            with open(pth_file, 'a+') as f:
+                for subpath in ['lib', 'lib64']:
+                    path = os.path.join(self.env_version, subpath)
+                    f.write(os.linesep)
+                    f.write(path)
 
     def create_pypackages_pth(
         self, site_dir: Optional[str] = site.USER_SITE
@@ -114,7 +114,7 @@ class LocalDistributionPath(DistributionPathMixin):
         if not os.path.exists(self.pypackages_dir):
             os.makedirs(self.pypackages_dir)
 
-        # XXX: need to determin best way to link pypackages
+        # XXX: need to determine best way to link pypackages
         # for site_packages_dir in site.getusersitepackages():
         if site_dir:
             if os.path.exists(site_dir) and os.path.isdir(site_dir):

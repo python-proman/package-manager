@@ -12,6 +12,7 @@ from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 from urllib.parse import urljoin
 
+import urllib3
 from distlib import DistlibException
 from distlib.database import Distribution
 from distlib.index import PackageIndex
@@ -20,7 +21,6 @@ from distlib.scripts import ScriptMaker
 from distlib.wheel import Wheel
 from packaging.specifiers import SpecifierSet
 from proman.common.packaging_bases import PackageManagerBase
-import urllib3
 
 from . import config
 from .dependencies import Dependency
@@ -35,6 +35,8 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 http = urllib3.PoolManager(maxsize=16)
+
+__all__: List[str] = ['PackageManager']
 
 
 class PackageManager(PackageManagerBase):

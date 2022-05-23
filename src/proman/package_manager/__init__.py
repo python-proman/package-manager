@@ -21,6 +21,7 @@ __author__ = 'Jesse P. Johnson'
 __title__ = 'proman-dependencies'
 __version__ = '0.1.1.dev4'
 __license__ = 'MPL-2.0'
+__all__: List[str] = ['local_distribution', 'package_manager', 'spec_cfg']
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
@@ -63,7 +64,7 @@ def get_package_manager() -> 'PackageManager':
         )
     else:
         print(specfile, lockfile)
-    print(manifest)
+    # print(manifest)
 
     # TODO setup proxy capability
     # setup repository
@@ -75,6 +76,3 @@ def get_package_manager() -> 'PackageManager':
         distribution_path=local_distribution,
         locator=locator,
     )
-
-
-__all__: List[str] = ['local_distribution', 'package_manager', 'spec_cfg']
