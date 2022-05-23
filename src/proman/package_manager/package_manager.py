@@ -36,6 +36,8 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 http = urllib3.PoolManager(maxsize=16)
 
+__all__: List[str] = ['PackageManager']
+
 
 class PackageManager(PackageManagerBase):
     """Perform package managment tasks for a project."""
